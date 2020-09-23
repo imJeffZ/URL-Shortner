@@ -33,7 +33,7 @@ public class URLShortner {
 	static final int PORT = 8026;
 	
 	// verbose mode
-	static final boolean verbose = false;
+	static final boolean verbose = true;
 
 	public static void main(String[] args) {
 		try {
