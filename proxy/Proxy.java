@@ -2,23 +2,26 @@ package proxy;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
+
 import proxy.ConnectionHandler;
 
 public class Proxy {
-    static String host = "dh2026pc05";
+    static final String HOST_FILE = "./proxy/hosts.txt";
+    static String[] hosts;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException {
 
-        // this.host = "dh2026pc05"; // Choose a host from host.txt
-
+        hosts = readHosts(HOST_FILE);
         try {
-            int remoteport = 8026;
-            int localport = 8030;
+            final int remoteport = 8026;
+            final int localport = 8030;
+            String tempHost = hosts[0];
             // Print a start-up message
-            System.out.println("Starting proxy for " + host + ":" + remoteport + " on port " + localport);
+            System.out.println("Starting proxy for " + tempHost + ":" + remoteport + " on port " + localport);
             // And start running the server
-            runServer(host, remoteport, localport); // never returns
-        } catch (Exception e) {
+            runServer(tempHost, remoteport, localport); // never returns
+        } catch (final Exception e) {
             System.err.println(e);
         }
     }
@@ -29,9 +32,9 @@ public class Proxy {
      * 
      * @return
      */
-    public static void runServer(String host, int remoteport, int localport) throws IOException {
+    public static void runServer(final String host, final int remoteport, final int localport) throws IOException {
         // Create a ServerSocket to listen for connections with
-        ServerSocket ss = new ServerSocket(localport);
+        final ServerSocket ss = new ServerSocket(localport);
 
         // while true
         // serversocket.accept (dont block)
@@ -53,14 +56,26 @@ public class Proxy {
 
                 // Start the client-to-server request thread running
 
-                Thread t = new Thread(new ConnectionHandler(clientSocket, host));
+                final Thread t = new Thread(new ConnectionHandler(clientSocket, host));
                 t.start();
                 System.out.println("thread spawned for new client.");
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 clientSocket.close(); 
                 e.printStackTrace();
             }
         }
     }
 
+    private static String[] readHosts(final String hostFile) throws IOException {
+        String s;
+        ArrayList<String> hosts = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(hostFile))) {
+            while((s = br.readLine()) != null) {
+                hosts.add(s);
+            }
+        } catch (final IOException exc) {
+            System.err.println("I/O Error in reading host file: " + exc);
+        }
+        return (String[]) hosts.toArray(new String[0]);
+    }
 }
