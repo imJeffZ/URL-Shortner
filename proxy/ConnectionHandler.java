@@ -3,13 +3,13 @@ package proxy;
 import java.io.*;
 import java.net.*;
 
-class ConnectionHandler implements Runnable {
+class ConnectionHandler extends Thread {
     Socket clientSocket;
     InputStream streamFromClient;
     OutputStream streamToClient;
     String node;
     Socket nodeSocket;
-    final byte[] request;
+    byte[] request;
     byte[] reply;
     InputStream streamFromNode;
     OutputStream streamToNode;
@@ -21,52 +21,77 @@ class ConnectionHandler implements Runnable {
         this.reply = new byte[4096];
     }
 
+    @Override
     public void run() {
         try {
-            this.nodeSocket = new Socket(node, 8026);
-            this.streamFromClient = clientSocket.getInputStream();
-            this.streamToClient = clientSocket.getOutputStream();
-        } catch (IOException e) {
-            PrintWriter out = new PrintWriter(streamToClient);
-            out.print("Proxy server cannot connect to " + node + ":" + 8026 + ":\n" + e + "\n");
-            out.flush();
+            // init streams from client
+            streamFromClient = clientSocket.getInputStream();
+            streamToClient = clientSocket.getOutputStream();
+
+            // create a socket connection to the node.
             try {
-                clientSocket.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
+                nodeSocket = new Socket(this.node, 8026);
+            } catch (IOException e) {
+                PrintWriter out = new PrintWriter(streamToClient);
+                out.print("Proxy server cannot connect to " + node + ":" + 8026 + ":\n" + e + "\n");
+                out.flush();
+                try {
+                    clientSocket.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                return;
             }
-            return;
-        }
-        try {
-            final OutputStream streamToNode = nodeSocket.getOutputStream();
+
+            // create the streams to the node.
+            streamFromNode = nodeSocket.getInputStream();
+            streamToNode = nodeSocket.getOutputStream();
+
+            // a new thread to read from client and send to node.
+            new Thread () {
+                public void run() {
+                    int bytesRead;
+                    System.out.println("Reading from client.");
+                    try {
+                        while ((bytesRead = streamFromClient.read(request)) != -1) {
+                            streamToNode.write(request, 0, bytesRead);
+                            streamToNode.flush();
+                        }
+                        System.out.println("Reading from client complete, closing streamToNode.");
+                    } catch (IOException e) {
+                    }
+
+                    try {
+                        streamToNode.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+
+            // this current thread reads response from node and forwards to client.
             int bytesRead;
-            System.out.println("Reading from client.");
-            while ((bytesRead = streamFromClient.read(request)) != -1) {
-                streamToNode.write(request, 0, bytesRead);
-                streamToNode.flush();
-                System.out.println("Wrote to node.");
-
-            }
-            streamToNode.close();
-            System.out.println("Reading from node.");
-            final InputStream streamFromNode = nodeSocket.getInputStream();
-            while ((bytesRead = streamFromNode.read(reply)) != -1) {
-                streamToClient.write(reply, 0, bytesRead);
-                streamToClient.flush();
+            try {
+                
+                System.out.println("Reading from node.");
+                while ((bytesRead = streamFromNode.read(reply)) != -1) {
+                    streamToClient.write(reply, 0, bytesRead);
+                    streamToClient.flush();
+                }
                 System.out.println("Wrote to client.");
-
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (nodeSocket != null)
+                    nodeSocket.close();
+                    System.out.println("Close nodesocket.");
+                if (clientSocket != null)
+                    clientSocket.close();
+                    System.out.println("Close clientsocket.");
             }
             streamToClient.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        try {
-            this.clientSocket.close();
-            this.nodeSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    } 
 }
