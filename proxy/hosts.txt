@@ -1,1 +1,4 @@
-dh2026pc05
+localhost
+dh2026pc06
+dh2026pc07
+dh2026pc08

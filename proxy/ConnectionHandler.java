@@ -8,15 +8,17 @@ class ConnectionHandler extends Thread {
     InputStream streamFromClient;
     OutputStream streamToClient;
     String node;
+    int nodePort;
     Socket nodeSocket;
     byte[] request;
     byte[] reply;
     InputStream streamFromNode;
     OutputStream streamToNode;
 
-    public ConnectionHandler(Socket clientSocket, String node) {
+    public ConnectionHandler(Socket clientSocket, String node, int nodePort) {
         this.clientSocket = clientSocket;
         this.node = node;
+        this.nodePort = nodePort;
         this.request = new byte[1024];
         this.reply = new byte[4096];
     }
@@ -30,10 +32,10 @@ class ConnectionHandler extends Thread {
 
             // create a socket connection to the node.
             try {
-                nodeSocket = new Socket(this.node, 8026);
+                nodeSocket = new Socket(this.node, this.nodePort);
             } catch (IOException e) {
                 PrintWriter out = new PrintWriter(streamToClient);
-                out.print("Proxy server cannot connect to " + node + ":" + 8026 + ":\n" + e + "\n");
+                out.print("Proxy server cannot connect to " + node + ":" + this.nodePort + ":\n" + e + "\n");
                 out.flush();
                 try {
                     clientSocket.close();

@@ -4,23 +4,20 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import proxy.ConnectionHandler;
-
 public class Proxy {
-    static final String HOST_FILE = "./proxy/hosts.txt";
-    static String[] hosts;
+    private static final int DEPRECATED_NODE_PORT = 8026;
+    private static final int PROXY_PORT = 8030;
+    private static LoadBalancer loadBalancer;
 
     public static void main(final String[] args) throws IOException {
 
-        hosts = readHosts(HOST_FILE);
+        loadBalancer = new LoadBalancer();
         try {
-            final int remoteport = 8026;
-            final int localport = 8030;
-            String tempHost = hosts[0];
+            String proxyHost = loadBalancer.getHost();
             // Print a start-up message
-            System.out.println("Starting proxy for " + tempHost + ":" + remoteport + " on port " + localport);
+            System.out.println("Starting proxy for " + proxyHost + " on port " + PROXY_PORT);
             // And start running the server
-            runServer(tempHost, remoteport, localport); // never returns
+            runServer(proxyHost, PROXY_PORT); // never returns
         } catch (final Exception e) {
             System.err.println(e);
         }
@@ -30,9 +27,10 @@ public class Proxy {
      * runs a single-threaded proxy server on the specified local port. It never
      * returns.
      * 
+     * 
      * @return
      */
-    public static void runServer(final String host, final int remoteport, final int localport) throws IOException {
+    public static void runServer(final String host, final int localport) throws IOException {
         // Create a ServerSocket to listen for connections with
         final ServerSocket ss = new ServerSocket(localport);
 
@@ -55,8 +53,8 @@ public class Proxy {
                 System.out.println("Accepted new connection. " + ss);
 
                 // Start the client-to-server request thread running
-
-                final Thread t = new Thread(new ConnectionHandler(clientSocket, host));
+                String nodeHost = loadBalancer.getHost();
+                final Thread t = new Thread(new ConnectionHandler(clientSocket, nodeHost, DEPRECATED_NODE_PORT));
                 t.start();
                 System.out.println("thread spawned for new client.");
             } catch (final Exception e) {
@@ -64,18 +62,5 @@ public class Proxy {
                 e.printStackTrace();
             }
         }
-    }
-
-    private static String[] readHosts(final String hostFile) throws IOException {
-        String s;
-        ArrayList<String> hosts = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(hostFile))) {
-            while((s = br.readLine()) != null) {
-                hosts.add(s);
-            }
-        } catch (final IOException exc) {
-            System.err.println("I/O Error in reading host file: " + exc);
-        }
-        return (String[]) hosts.toArray(new String[0]);
     }
 }
