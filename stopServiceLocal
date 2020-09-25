@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "Stopping on "$(hostname)
+kill -9 $(ps aux | grep URLShortner | head -n 1 | awk '{print $2}')

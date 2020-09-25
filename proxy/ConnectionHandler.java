@@ -53,7 +53,7 @@ class ConnectionHandler extends Thread {
             new Thread () {
                 public void run() {
                     int bytesRead;
-                    System.out.println("Reading from client.");
+                    System.out.println("Reading from client. Sending to node at " + node);
                     try {
                         while ((bytesRead = streamFromClient.read(request)) != -1) {
                             streamToNode.write(request, 0, bytesRead);
