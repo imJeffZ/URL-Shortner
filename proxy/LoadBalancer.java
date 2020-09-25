@@ -23,8 +23,8 @@ public class LoadBalancer {
      * @return host
      */
     String getHost() {
-        String host = this.hostsQueue.peekFirst();
-        // this.hostsQueue.addLast(host);
+        String host = this.hostsQueue.removeFirst();
+        this.hostsQueue.addLast(host);
         return host;
     }
 
