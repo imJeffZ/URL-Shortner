@@ -1,0 +1,24 @@
+#!/bin/bash
+CWD="`pwd`";
+for host in `cat ../proxy/hosts.txt`
+do
+    # output: HOSTNAME UP/DOWN LINES_IN_DB (LINES_IN_DB is only present if host is UP)
+    # output: dh2020pc05 UP 52
+    # output: dh2020pc02 DOWN
+    echo "Performing health monitoring check on $host."
+    LINES_IN_DB=$(ssh $host "cd ${PWD}/.. && wc -l database.txt | awk '{print $1}'")
+    STATUS=""
+    `nc -vz $host 8026`
+    HEALTHCHECK=$?
+    if [[ $HEALTHCHECK -eq 0 ]];then
+        STATUS="UP"
+    else
+        STATUS="DOWN"
+    fi
+    echo $host $HEALTHCHECK $STATUS $LINES_IN_DB
+    echo $host $STATUS $LINES_IN_DB >> healthcheck.txt.new
+done
+cat healthcheck.txt.new > healthcheck.txt
+echo "updated health."
+rm -rf healthcheck.txt.new
+sleep 10s

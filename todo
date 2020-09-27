@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# 1.batch writes from master(load balancer) to all nodes every 30s
+# 2. have a service that checks every 30s to get the number of lines present on each node
+#   if lines are less then copy from the node with max lines
+
+
+# Ali
+#  DONE check in the healthcheck file if the URLShortner process is still alive on the selected host.
+
+# finish up health checks.
+# Writing to cache on master step 2
+# reads need to be first checked on the load balancer cache
+# batch writes from master(load balancer) to all nodes every 30s
+
+# Data recovery (Jeff)
+
+# have a service that checks every 30s to get the number of lines present on each node
+#   if lines are less then copy from the node with max lines
+
+# Shahmeer
+
+# check if health is bad then initiate the host again
+
+
+# todos later:
+
+# 1. switch to using CRONjobs
+# 2. cleanup services and move to services/

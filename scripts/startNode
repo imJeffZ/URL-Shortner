@@ -11,5 +11,6 @@ if [[ TOTAL_THREADS -eq 0 ]];then
 fi
 
 # NEED TO FIX (SEND THREAD COUNT INTO URLShortner to make use of maximum threads)
-nohup java URLShortner $2 > out/service$1.out 2>out/service$1.error < /dev/null &
-echo $! > out/service$1.pid;
+cd ..
+nohup java URLShortner $2 > ./scripts/out/service$1.out 2>./scripts/out/service$1.error < /dev/null &
+echo $! > ./scripts/out/service$1.pid;
