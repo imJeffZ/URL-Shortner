@@ -1,4 +1,15 @@
 #!/bin/bash
 echo "Starting on "$(hostname)
+CORES=$(lscpu | egrep 'Core\(s\)' | awk '{print $4}')
+THREADS=$(lscpu | egrep 'Thread' | awk '{print $4}')
+SOCKETS=$(lscpu | egrep 'Socket' | awk '{print $2}')
+
+TOTAL_THREADS=$(( CORES*THREADS*SOCKETS ))
+
+if [[ TOTAL_THREADS -eq 0 ]];then
+    TOTAL_THREADS=4
+fi
+
+# NEED TO FIX (SEND THREAD COUNT INTO URLShortner to make use of maximum threads)
 nohup java URLShortner $2 > out/service$1.out 2>out/service$1.error < /dev/null &
 echo $! > out/service$1.pid;

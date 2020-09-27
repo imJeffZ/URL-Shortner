@@ -4,3 +4,4 @@ for host in `cat ./proxy/hosts.txt`
 do
 	ssh $host "cd \"$CWD\"; ./stopServiceLocal"
 done
+kill -9 $(ps aux | grep monitorService | head -n 1 | awk '{print $2}')

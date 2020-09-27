@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# wait for usage file to be created then start proxy server.
+CWD="`pwd`";
+nohup $CWD/monitorService $2 > out/monitor$1.out 2>out/monitor$1.error < /dev/null &
+echo "waiting for monitoring service to begin."
+
+while [ ! -f $CWD'/usage.txt' ]
+do
+  sleep 2
+done
+
+javac proxy/*.java
+java proxy/Proxy

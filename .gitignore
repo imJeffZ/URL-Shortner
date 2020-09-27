@@ -1,3 +1,4 @@
 *.class
 proxy/*.class
-./out/*
+out/*
+*.txt*

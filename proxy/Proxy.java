@@ -13,11 +13,10 @@ public class Proxy {
 
         loadBalancer = new LoadBalancer();
         try {
-            String proxyHost = loadBalancer.getHost();
             // Print a start-up message
-            System.out.println("Starting proxy for " + proxyHost + " on port " + PROXY_PORT);
+            System.out.println("Starting proxy for " + InetAddress.getLocalHost().getHostName() + " on port " + PROXY_PORT);
             // And start running the server
-            runServer(proxyHost, PROXY_PORT); // never returns
+            runServer(PROXY_PORT); // never returns
         } catch (final Exception e) {
             System.err.println(e);
         }
@@ -30,7 +29,7 @@ public class Proxy {
      * 
      * @return
      */
-    public static void runServer(final String host, final int localport) throws IOException {
+    public static void runServer(final int localport) throws IOException {
         // Create a ServerSocket to listen for connections with
         final ServerSocket ss = new ServerSocket(localport);
 
