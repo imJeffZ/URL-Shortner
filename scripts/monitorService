@@ -1,0 +1,12 @@
+#!/bin/bash
+CWD="`pwd`";
+rm -rf usage.txt.new usage.txt
+for host in `cat ./proxy/hosts.txt`
+do
+    echo "Performing monitoring check on $host."
+    RESULTS=$(ssh $host "cd \"$CWD\"; ./usageLocal")
+    echo $RESULTS >> usage.txt.new
+done
+cat usage.txt.new > usage.txt
+echo "updated usage."
+rm -rf usage.txt.new

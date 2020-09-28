@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# one time tasks
+CWD="`pwd`";
+echo "waiting for monitoring service to begin."
+
+# while [ ! -f $CWD'/usage.txt' ]
+# do
+#   sleep 2
+# done
+cd ..
+javac proxy/*.java
+java proxy/Proxy &
+
+javac URLShortner.java
+for host in `cat ./proxy/hosts.txt`
+do
+	ssh $host "cd \"$CWD\"; ./startNode"
+done
+
+# setup recurring tasks
+crontab ./scripts/cron_schedule
