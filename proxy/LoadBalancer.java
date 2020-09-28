@@ -18,8 +18,9 @@ public class LoadBalancer {
         this.hostsQueue = new ArrayDeque<String>(hostsArray);
     }
     
-    // Switch load balancer to eventually use the 'usage' script output to select the best host.
-    // Always have 1/5 hosts as 
+    // 1. Switch load balancer to eventually use the 'usage' script output to select the best host.
+
+    // Always have 1/5 hosts as backup
 
     /***
      * get load balanced host using round robin

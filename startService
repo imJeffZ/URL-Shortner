@@ -1,7 +1,0 @@
-#!/bin/bash
-CWD="`pwd`";
-javac URLShortner.java
-for host in `cat ./proxy/hosts.txt`
-do
-	ssh $host "cd \"$CWD\"; ./startServiceLocal"
-done
