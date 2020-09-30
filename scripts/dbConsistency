@@ -1,10 +1,4 @@
 #!/bin/bash
-CWD="`pwd`";
-# for host in `cat ./proxy/hosts.txt`
-# do
-# 	dbLines=$( ssh $host "wc -l < /virtual/database.txt" )
-# 	echo dbLines > ./healthcheck.txt
-# done
 
 main() {
   init_files
@@ -16,39 +10,39 @@ main() {
 
 init_files() {
   # append extra newline in healthcheck to help read
+  if [ ! -e "./healthcheck.txt" ];then
+    echo "missing healthcheck.txt file, please run healthcheck service first"
+    exit 0
+  fi
   cat "./healthcheck.txt" > "./healthcheck_tmp"
   healthcheck="./healthcheck_tmp"
-  echo `` >> $healthcheck
 }
 
 cleanup() {
-  # remove the appended newline
-  truncate -s-1 $healthcheck
   # remove healthcheck_tmp
   rm -f $healthcheck
 }
 
 find_max_line_in_db() {
-  while IFS=" " read host status line_in_db; do
+  while IFS=" " read host status line_in_db db; do
     # ignore hosts that are down
-    if [ $status == "DOWN" ]; then
+    if [ "$status" = "DOWN" ];then
       echo "warning: $host is down"
       continue
     fi
-
     # look for host with maximum db
-    if [ -z $host_with_max_line_in_db ]; then
+    if [ -z "$host_with_max_line_in_db" ];then
       host_with_max_line_in_db=$host
       max_line_in_db=$line_in_db
-    elif [ $max_line_in_db -lt $line_in_db ]; then
+    elif [[ "$max_line_in_db" -lt "$line_in_db" ]];then
       host_with_max_line_in_db=$host
       max_line_in_db=$line_in_db 
     fi
   done < $healthcheck
-  if [ -z $host_with_max_line_in_db ]; then
-    echo "warning: every host is down, no consistency check or recovery performed"
-    cleanup
-    exit 0
+  if [ -z $host_with_max_line_in_db ];then
+	  echo "warning: every host is down, no consistency check or recovery performed"
+	  cleanup
+	  exit 0
   fi
 }
 
@@ -56,19 +50,17 @@ consistency_check() {
   echo "running consistency check"
   # array of hosts that have inconsistent db
   inconsistent=()
-  while IFS=" " read host status line_in_db; do
+  while IFS=" " read host status line_in_db db; do
     # ignore hosts that are down
-    if [ $status == "DOWN" ]; then
+    if [ "$status" == "DOWN" ];then
       continue
     fi
-
-    # 
-    if [ $line_in_db -lt $max_line_in_db ]; then
+    if [[ "$line_in_db" -lt "$max_line_in_db" ]];then
       inconsistent+=($host)
-      echo "$host has" $(($max_line_in_db - $line_in_db)) "lines of inconsistentcy"
+      echo "$host has "$(($max_line_in_db - $line_in_db))" lines of inconsistentcy"
     fi
   done < $healthcheck
-  if [ ${#inconsistent[@]} -eq 0 ]; then
+  if [ ${#inconsistent[@]} -eq 0 ];then
     echo "All hosts are consistent"
     cleanup
     exit 0
@@ -79,8 +71,8 @@ fix_consistency() {
   # fix all inconsistent hosts by copying the host with max line of db
   for host in "${inconsistent[@]}"
   do
-    scp "$host_with_max_line_in_db:/virtual/database.txt $host:/virtual/"
-    if [ $? -eq 0 ]; then
+    scp "$host_with_max_line_in_db:/virtual/database.txt" "$host:/virtual/"
+    if [ $? -eq 0 ];then
       echo "$host: fixed inconsistency"
     else
       echo "warning: $host: failed to fix inconsistency"
