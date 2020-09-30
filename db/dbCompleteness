@@ -1,7 +1,0 @@
-#!/bin/bash
-CWD="`pwd`";
-for host in `cat ./proxy/hosts.txt`
-do
-	dbLines=$( ssh $host "wc -l < /virtual/database.txt" )
-	echo dbLines > ./healthcheck.txt
-done
