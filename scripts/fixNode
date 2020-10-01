@@ -1,0 +1,16 @@
+#!/bin/bash
+
+current_dir=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+cat "./healthcheck.txt" > "./healthcheck.fixNode.tmp.txt"
+
+file="./healthcheck.fixNode.tmp.txt"
+while IFS=" " read -r hostname status rest;
+do
+    if [ "$status" != "UP" ]; then
+        echo "$hostname is DOWN. Restarting..."
+        ssh $hostname cd "$current_dir" && ./startNode
+    fi
+done < $file
+
+rm -f $file
