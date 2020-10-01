@@ -28,7 +28,7 @@ public class URLShortner {
 	static final String REDIRECT_RECORDED = "redirect_recorded.html";
 	static final String REDIRECT = "redirect.html";
 	static final String NOT_FOUND = "notfound.html";
-	static final String DATABASE = "database.txt";
+	static final String DATABASE = "/virtual/database.txt";
 	// port to listen connection
 	static final int PORT = 8026;
 	
