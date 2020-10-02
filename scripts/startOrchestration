@@ -23,3 +23,4 @@ crontab -u ${USER} -l > $CWD/crontab
            /bin/echo "* * * * * /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./healthService' > cron.error
 * * * * * ( sleep 30 ; /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./healthService' > cron.error )" >> $CWD/crontab
 crontab $CWD/crontab
+rm -rf $CWD/crontab
