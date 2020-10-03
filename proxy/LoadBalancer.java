@@ -12,15 +12,23 @@ import javax.imageio.IIOException;
 public class LoadBalancer {
     private final String HOSTS_FILE = "./proxy/hosts.txt";
     Deque<String> hostsQueue;
+    public ArrayList<String> hostsArray;
+    private static ArrayList<Shard> shards;
 
     LoadBalancer() throws IOException {
-        ArrayList<String> hostsArray = readHosts(HOSTS_FILE);
-        this.hostsQueue = new ArrayDeque<String>(hostsArray);
+        this.hostsArray = readHosts(HOSTS_FILE);
+        // this.hostsQueue = new ArrayDeque<String>(hostsArray);
+        assignHostsToShard(hostsArray);
     }
     
     // 1. Switch load balancer to eventually use the 'usage' script output to select the best host.
 
     // Always have 1/5 hosts as backup
+
+    Shard getShard(String shortURL) {
+        int hash = Hash.getHash(shortURL, shards.size());
+        return shards.get(hash);
+    }
 
     /***
      * get load balanced host using round robin
@@ -47,4 +55,18 @@ public class LoadBalancer {
         }
         return hosts;
     }
+
+    private void assignHostsToShard(ArrayList<String> hosts) {
+        int numHosts = hosts.size();
+        shards = new ArrayList<Shard>();
+        ArrayList<ArrayList<String>> shardsLists = new ArrayList<ArrayList<String>>();
+        int numShards = (int) Math.floor(numHosts / 2);
+
+        for (int i = 0; i < numHosts; i++)
+            shardsLists.get(i % numShards).add(hosts.get(i));
+
+        for (int i = 0; i < numShards; i++)
+            shards.add(new Shard(shardsLists.get(i), i));
+    }
+
 }

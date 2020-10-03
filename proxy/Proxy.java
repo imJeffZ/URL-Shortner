@@ -12,6 +12,8 @@ public class Proxy {
     public static void main(final String[] args) throws IOException {
 
         loadBalancer = new LoadBalancer();
+
+        // shardHandlers = new ShardHandler();
         try {
             // Print a start-up message
             System.out.println("Starting proxy for " + InetAddress.getLocalHost().getHostName() + " on port " + PROXY_PORT);
@@ -52,8 +54,9 @@ public class Proxy {
                 System.out.println("Accepted new connection. " + ss);
 
                 // Start the client-to-server request thread running
-                String nodeHost = loadBalancer.getHost();
-                final Thread t = new Thread(new ConnectionHandler(clientSocket, nodeHost, DEPRECATED_NODE_PORT));
+                // String nodeHost = loadBalancer.getHost();
+                Shard shard = loadBalancer.getShard();
+                final Thread t = new Thread(new ConnectionHandler(clientSocket, nodeHost, DEPRECATED_NODE_PORT, loadBalancer));
                 t.start();
                 System.out.println("thread spawned for new client.");
             } catch (final Exception e) {
