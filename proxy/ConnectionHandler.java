@@ -14,21 +14,28 @@ class ConnectionHandler extends Thread {
     byte[] reply;
     InputStream streamFromNode;
     OutputStream streamToNode;
+    LoadBalancer loadBalancer;
 
-    public ConnectionHandler(Socket clientSocket, String node, int nodePort) {
+    public ConnectionHandler(Socket clientSocket, String node, int nodePort, LoadBalancer loadBalancer) {
         this.clientSocket = clientSocket;
         this.node = node;
         this.nodePort = nodePort;
         this.request = new byte[1024];
         this.reply = new byte[4096];
+        this.loadBalancer = loadBalancer;
     }
 
     @Override
     public void run() {
+
+        
         try {
             // init streams from client
             streamFromClient = clientSocket.getInputStream();
             streamToClient = clientSocket.getOutputStream();
+
+            // Read the short from the request
+            // Get Shard from loadBalancer based on short
 
             // create a socket connection to the node.
             try {
