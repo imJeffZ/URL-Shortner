@@ -27,3 +27,26 @@
 
 # 1. switch to using CRONjobs
 # 2. cleanup services and move to services/
+
+
+# create a data layer object which knows about each node and also has the hash method
+# implement startup
+
+# manage adding and removing nodes (not automatic).
+
+# python program to handle host adding and removing
+# add a host
+#   if (hosts % 2 == 0 ): // New shard was added
+#       tell java to reassign hosts to shards:
+#           save 1 representative node from each shard
+#           reread nodes from hosts.txt
+#           assign hosts to shards
+#           each representative sends all data through HTTP requests to load balancer
+#   elif (hosts % 2 == 1): // New host belongs to existing shards
+#       tell java to reassign hosts to shards:
+#           reread hosts.txt
+#           assign new node to shard
+#           replicate data (SCP) from existing node within shard
+
+# shard(short) = hash(short)  % (numNodes // 2)
+
