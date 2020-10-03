@@ -50,3 +50,19 @@
 
 # shard(short) = hash(short)  % (numNodes // 2)
 
+# reading/writing to shard
+# Proxy receives socket connection
+# Sends socket connection to ConnectionHandler with LoadBalancer
+# Connection handler reads request from socket
+# ConnectionHandler gets Shard from LoadBalancer based on short
+# if request == GET:
+#   Shard.read(short) -> String: OR Shard.forwardReadRequest(request)
+#       Shard creates its own request using short and sends it to 1 node
+#       returns response to ConnectionHandler
+#   ConnectionHandler creates response to send back to client
+# elif request == PUT
+#   Shard.write(short, long) -> Bool: OR Shard.forwardWriteRequest(request)
+#       Shard creates concurrent requests to send to all nodes
+#       Once one/all nodes respond with 200, return True
+#   ConnectionHandler creates 200/500 response to send back to client
+
