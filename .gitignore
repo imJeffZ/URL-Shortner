@@ -1,4 +1,5 @@
 *.class
 proxy/*.class
-*.txt*
+# *.txt*
+database.txt
 scripts/out/*
