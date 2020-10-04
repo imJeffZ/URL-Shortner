@@ -2,6 +2,7 @@ package proxy;
 
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,33 +29,22 @@ class ConnectionHandler extends Thread {
     @Override
     public void run() {
         try {
+            System.out.println("inside run method.");
             // init streams from client
             streamFromClient = clientSocket.getInputStream();
             streamToClient = clientSocket.getOutputStream();
 
-            // a new thread to read from client and send to node.
-            new Thread() {
-                public void run() {
-                    int bytesRead;
-                    System.out.println("Reading from client.");
-                    int totalBytes = 0;
-                    try {
-                        while ((bytesRead = streamFromClient.read(request)) != -1) {
-                            totalBytes += bytesRead;
-                        }
-                        nodeSocket = handleRequest(totalBytes);
-                        streamFromNode = nodeSocket.getInputStream();
-                        System.out.println("Reading from client complete, closing streamToNode.");
-                    } catch (IOException e) {
-                    }
+            int bytesReadIncoming = streamFromClient.read(request);
+            nodeSocket = handleRequest(bytesReadIncoming);
+            System.out.println("read from client complete..");
+            streamFromNode = nodeSocket.getInputStream();
 
-                }
-            }.start();
-
-            // this current thread reads response from node and forwards to client.
             int bytesRead;
+            // this current thread reads response from node and forwards to client.
             try {
                 System.out.println("Reading from node.");
+                while (streamFromNode == null)
+                    continue;
                 while ((bytesRead = streamFromNode.read(reply)) != -1) {
                     streamToClient.write(reply, 0, bytesRead);
                     streamToClient.flush();
@@ -65,22 +55,27 @@ class ConnectionHandler extends Thread {
             } finally {
                 closeConnections();
             }
-            streamToClient.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            closeConnections();
         }
     }
 
     /*
      * close client and socket connection.
      */
-    private void closeConnections() throws IOException {
+    private void closeConnections() {
         if (nodeSocket != null)
-            nodeSocket.close();
-        System.out.println("Close nodesocket.");
-        if (clientSocket != null)
-            clientSocket.close();
-        System.out.println("Close clientsocket.");
+            try {
+                nodeSocket.close();
+                System.out.println("Close nodesocket.");
+                if (clientSocket != null)
+                    clientSocket.close();
+                System.out.println("Close clientsocket.");
+            } catch (IOException e) {
+                System.out.println("error closing socket connections.");
+            }
     }
 
     /*
@@ -104,6 +99,7 @@ class ConnectionHandler extends Thread {
             if (mput.matches()) {
                 return putHandler(mput, bytesRead);
             } else if (mget.matches()) {
+                System.out.println("sending to get handler.");
                 return getHandler(mget, bytesRead);
             } else {
                 return null;
@@ -131,6 +127,7 @@ class ConnectionHandler extends Thread {
      * read from.
      */
     private Socket getHandler(Matcher mget, int bytesRead) {
+        System.out.println("GET REQUEST CAME");
         String shortResource = mget.group(2);
         Shard shard = this.loadBalancer.getShard(shortResource);
         return shard.forwardReadRequest(request, bytesRead, nodePort);
