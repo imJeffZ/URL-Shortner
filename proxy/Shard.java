@@ -18,7 +18,8 @@ class Shard {
 
     public Socket forwardReadRequest(byte[] request, int bytesRead, Socket nodeSocket) {
         String host = this.hosts.get(currentHost);
-        System.out.println(String.format("Shard %d received read request, forwarding to host %s\n", this.shardNumber, host));
+        System.out.println(
+                String.format("Shard %d received read request, forwarding to host %s\n", this.shardNumber, host));
         this.currentHost = (this.currentHost + 1) % this.hosts.size();
         OutputStream streamToNode;
         try {
@@ -41,14 +42,36 @@ class Shard {
         return nodeSocket;
     }
 
-    public InputStream forwardWriteRequest(byte[] request, int bytesRead, int nodePort) {
-        System.out.print(String.format("Shard %d received write request, forwarding to hosts", this.shardNumber));
-        for (String host : this.hosts)
-            System.out.print(String.format(" %s", host));
-        System.out.print(".\n");
+    public Socket forwardWriteRequest(byte[] request, int bytesRead, int nodePort) {
         ArrayList<Socket> nodeSockets = new ArrayList<Socket>();
+        System.out.print(String.format("Shard %d received write request, forwarding to hosts", this.shardNumber));
+        for (String host : this.hosts) {
+            System.out.print(String.format(" %s", host));
+            try {
+                nodeSockets.add(new Socket(host, nodePort));
+            } catch (UnknownHostException e) {
+                System.out.print(":UNAVAILABLE");
+                e.printStackTrace();
+            } catch (IOException e) {
+                System.out.print(":UNAVAILABLE");
+                e.printStackTrace();
+            }
+        }
+        System.out.print(".\n");
+
+        for (Socket nodeSocket : nodeSockets) {
+            try {
+                OutputStream streamToNode = nodeSocket.getOutputStream();
+                streamToNode.write(request, 0, bytesRead);
+                streamToNode.flush();
+                streamToNode.close();
+			} catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         
-        return null;
+
+        return nodeSockets.get(0);
     }
 
     
