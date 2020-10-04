@@ -16,13 +16,12 @@ class Shard {
         this.currentHost = 0;
     }
 
-    public InputStream forwardReadRequest(byte[] request, int bytesRead, Socket nodeSocket) {
+    public Socket forwardReadRequest(byte[] request, int bytesRead, Socket nodeSocket) {
         String host = this.hosts.get(currentHost);
-        System.out.println(String.format("Shard %d received request, forwarding to host %s\n", this.shardNumber, host));
+        System.out.println(String.format("Shard %d received read request, forwarding to host %s\n", this.shardNumber, host));
         this.currentHost = (this.currentHost + 1) % this.hosts.size();
-        InputStream streamFromNode; OutputStream streamToNode;
+        OutputStream streamToNode;
         try {
-            streamFromNode = nodeSocket.getInputStream();
             streamToNode = nodeSocket.getOutputStream();
         } catch (IOException e) {
             e.printStackTrace();
@@ -39,10 +38,14 @@ class Shard {
             return null;
         }
 
-        return streamFromNode;
+        return nodeSocket;
     }
 
-    public Byte[] forwardWriteRequest(byte[] request, int bytesRead, int nodePort) {
+    public InputStream forwardWriteRequest(byte[] request, int bytesRead, int nodePort) {
+        System.out.print(String.format("Shard %d received write request, forwarding to hosts", this.shardNumber));
+        for (String host : this.hosts)
+            System.out.print(String.format("%s ", host));
+        System.out.print("\n");
         return null;
     }
 
