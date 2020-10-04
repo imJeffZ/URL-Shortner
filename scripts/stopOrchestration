@@ -7,3 +7,4 @@ do
 done
 echo "Killing proxy"
 kill -9 $(ps aux | grep java | grep proxy/Proxy | head -n 1 | awk '{print $2}')
+echo "All systems stopped successfully."

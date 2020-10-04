@@ -37,10 +37,10 @@ class Shard {
                 host = this.getCurrentHost();
                 nodeSocket = new Socket(host, nodePort);
                 streamToNode = nodeSocket.getOutputStream();
-                System.out.println(String.format(" ✅ ACCEPTED: %s\n", host));
+                System.out.println(String.format("✅ ACCEPTED: %s\n", host));
                 break;
             } catch (IOException e) {
-                System.out.println(String.format(" ❌ UNAVAILABLE: %s\n", this.getCurrentHost()));
+                System.out.println(String.format("❌ UNAVAILABLE: %s\n", this.getCurrentHost()));
             }
         }
 

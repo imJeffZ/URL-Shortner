@@ -2,7 +2,6 @@ package proxy;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
 public class Proxy {
     private static final int DEPRECATED_NODE_PORT = 8026;
@@ -16,7 +15,8 @@ public class Proxy {
         // shardHandlers = new ShardHandler();
         try {
             // Print a start-up message
-            System.out.println("Starting proxy for " + InetAddress.getLocalHost().getHostName() + " on port " + PROXY_PORT);
+            System.out.println(
+                    "✅ Proxy started on " + InetAddress.getLocalHost().getHostName() + " on port " + PROXY_PORT);
             // And start running the server
             runServer(PROXY_PORT); // never returns
         } catch (final Exception e) {
@@ -49,7 +49,6 @@ public class Proxy {
             Socket clientSocket = null;
             try {
                 // Wait for a connection on the local port
-                System.out.println("Waiting for a client ...");
                 clientSocket = ss.accept();
                 System.out.println("Accepted new connection. " + ss);
 
@@ -57,9 +56,8 @@ public class Proxy {
                 // String nodeHost = loadBalancer.getHost();
                 final Thread t = new Thread(new ConnectionHandler(clientSocket, loadBalancer, DEPRECATED_NODE_PORT));
                 t.start();
-                System.out.println("thread spawned for new client.");
             } catch (final Exception e) {
-                clientSocket.close(); 
+                clientSocket.close();
                 e.printStackTrace();
             }
         }
