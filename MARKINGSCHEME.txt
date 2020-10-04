@@ -1,62 +1,64 @@
-URL Shortner: ?/50
+URL Shortner: ?/40
 
-Basic: ?/10
-TODO	1) Long to Short: 2
-		- 1 Good Request
-		- 1 Bad Request
-DONE	2) Short to Long: 2
-		- 1 Good Request
-		- 1 Bad Request
-DONE	3) Accept any read after any node (max 1) fail: 2
-DONE	4) Accept any write after any node (max 1) fail: 2 
-DONE    5) Required components: 2
-		- 1 Load Balancer/Proxy Server
-		- 1 Multithreaded URL Shortener
+Functionality: ?/4
+	1) Long to Short: 2
+N		[Y/N] 1 Good Request
+N		[Y/N] 1 Bad Request
+	2) Short to Long: 2
+Y		[Y/N] 1 Good Request
+Y		[Y/N] 1 Bad Request
 
-Architecture: ?/20
-	1) Scalability: 6
-TODO		- Is it able to scale vertically?: 2
-			- If not, how much effort to implement: 2/2 if simple, 1/2 if complex
-DONE		- Is it able to scale horizontally?: 4
-			- 1 mark iff works and simple
-			- 1 partially implemeted
-			- 2 fully implemeted
-DONE	2) Consistency: 2
-		- Give marks iff system response with most recent write or an error
-DONE	3) Availability: 7
-		- 3 System always gives a response
-		- 4 System always gives the correct response
-DONE	4) Partition Tolerance: 7
-		- 3 Data is distributed by a defined map
-		- 4 System will response after any node (max 1) fail
+Architecture: ?/18
+	1) Scalability: 4
+		- Is it able to scale vertically?: 2
+N			[Y/N] 2 Works
+			- If not, how much effort to implement
+				[Y/N] 0.5 if simple
+		- Is it able to scale horizontally?: 2
+Y			[Y/N] 2 Works
+			- If not, how much effort to implement
+				[Y/N] 0.5 if simple
+	2) Consistency: 2
+Y		[Y/N] 2 System response with most recent write or an error
+	3) Availability: 2
+Y		[Y/N] 2 System always gives a response
+	4) Partition Tolerance: 6
+Y		[Y/N] 2 Data is distributed by a defined map or completely replicated
+Y		[Y/N] 2 Accept read after any node fail
+Y		[Y/N] 2 Accept write after any node fail
+	5) Required components: 4
+Y		[Y/N] 1 Load Balancer/Proxy Server
+N		[Y/N] 1 Multithreaded URL Shortener
+Y		[Y/N] 1 Logging
+N		[Y/N] 1 Caching
 
-Disaster recovery: ?/8
-	1) Healthcheck: 2
-		- 1 partially implemeted
-TODO		- 1 fully implemeted
-DONE	2) Application server recovery: 3
-		- 1 partially implemeted
-		- 1 fully implemeted
-		- 1 explain how the system recovers
-TODO	3) Data recovery: 3
-		- 1 partially implemeted
-		- 1 fully implemeted
-		- 1 explain how the system recovers
+Disaster recovery: ?/7
+	1) Healthcheck: 3
+Y		[Y/N] 1 Partially implemeted
+N		[Y/N] 1 Fully implemeted
+N		[Y/N] 1 UI implementation
+	2) Application server recovery: 2
+Y		[Y/N] 1 Partially implemeted
+N		[Y/N] 1 Fully implemeted
+	3) Data recovery: 2
+N		[Y/N] 1 Partially implemeted
+N		[Y/N] 1 Fully implemeted
 
-DONE    Orchestration: ?/3
-	- 2 Launch your service onto the 4 systems (min 3)
-	- 1 Shutdown your service
+Orchestration: ?/2
+Y	[Y/N] 1 Launch your service onto the given systems
+Y	[Y/N] 1 Shutdown your service
 
-TODO Testing tools: ?/2
-	- 1 Script to test performance
-	- 1 Script to test availability
-	- 1 Show test results for their application (Graphs, Statistics)
+Testing tools: ?/3
+N	[Y/N] 1 Script to test performance
+N	[Y/N] 1 Script to test availability
+N	[Y/N] 1 Show test results for their application (Graphs, Statistics)
 
-TODO Documentation: ?/4
-	- 2 Diagram of the system or a detail description of the system
-	- 2 Shows understand of the system, weakness and strength
+Documentation: ?/3
+Y	[Y/N] 1 Diagram of the system (saftware and data)
+N	[Y/N] 1 Detail description of the system (software and data)
+N	[Y/N] 1 Shows understand of the system, weakness and strength
 
-TODO Code Quality: ?/3
-	- 1 Clean code. No commented out code, proper indentation
-	- 1 Proper Names. Classes, variables, functions
-	- 1 Structure. Proper use of classes, functions, resources
+Code Quality: ?/3
+N	[Y/N] 1 Clean code. No commented out code, proper indentation
+N	[Y/N] 1 Proper Names. Classes, variables, functions
+Y	[Y/N] 1 Structure. Proper use of classes, functions, resources

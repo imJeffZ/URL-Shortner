@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # 1.batch writes from master(load balancer) to all nodes every 30s
 # 2. have a service that checks every 30s to get the number of lines present on each node
 #   if lines are less then copy from the node with max lines
