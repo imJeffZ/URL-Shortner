@@ -12,7 +12,12 @@ cd ..
 javac proxy/*.java
 echo "deleting $CWD"
 rm -rf $CWD/out/proxy.*
-nohup java proxy/Proxy > $CWD/out/proxy.out 2> $CWD/out/proxy.error < /dev/null &
+
+if [ "$1" == "-t" ]; then
+    java proxy/Proxy >>/dev/null 2>&1 &
+else
+    nohup java proxy/Proxy > $CWD/out/proxy.out 2> $CWD/out/proxy.error < /dev/null &
+fi
 
 javac URLShortner.java
 for host in `cat ./proxy/hosts.txt`
