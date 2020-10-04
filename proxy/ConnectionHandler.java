@@ -35,8 +35,8 @@ class ConnectionHandler extends Thread {
             streamToClient = clientSocket.getOutputStream();
 
             int bytesReadIncoming = streamFromClient.read(request);
-            nodeSocket = handleRequest(bytesReadIncoming);
             System.out.println("read from client complete..");
+            nodeSocket = handleRequest(bytesReadIncoming);
             streamFromNode = nodeSocket.getInputStream();
 
             int bytesRead;
@@ -52,8 +52,6 @@ class ConnectionHandler extends Thread {
                 System.out.println("Wrote to client.");
             } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
-                closeConnections();
             }
         } catch (IOException e) {
             e.printStackTrace();
