@@ -61,7 +61,7 @@ public class LoadBalancer {
         shards = new ArrayList<Shard>();
         ArrayList<ArrayList<String>> shardLists = new ArrayList<ArrayList<String>>();
         int numShards = (int) Math.floor(numHosts / 2);
-        System.out.println(String.format("Assigning %d nodes to %d shards."));
+        System.out.println(String.format("Assigning %d nodes to %d shards.", numHosts, numShards));
 
         for (int i = 0; i < numShards; i++)
             shardLists.add(new ArrayList<String>());
