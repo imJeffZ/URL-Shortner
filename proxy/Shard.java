@@ -30,7 +30,7 @@ class Shard {
         }
 
         try {
-            System.out.println(String.format("Shard %d writing to host %s\n", this.shardNumber, host));
+            System.out.println(String.format("Shard %d reading from host %s\n", this.shardNumber, host));
             streamToNode.write(request, 0, bytesRead);
             streamToNode.flush();
             streamToNode.close();
