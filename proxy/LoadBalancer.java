@@ -59,14 +59,20 @@ public class LoadBalancer {
     private void assignHostsToShard(ArrayList<String> hosts) {
         int numHosts = hosts.size();
         shards = new ArrayList<Shard>();
-        ArrayList<ArrayList<String>> shardsLists = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> shardLists = new ArrayList<ArrayList<String>>();
         int numShards = (int) Math.floor(numHosts / 2);
-
-        for (int i = 0; i < numHosts; i++)
-            shardsLists.get(i % numShards).add(hosts.get(i));
+        System.out.println(String.format("Assigning %d nodes to %d shards.", numHosts, numShards));
 
         for (int i = 0; i < numShards; i++)
-            shards.add(new Shard(shardsLists.get(i), i));
+            shardLists.add(new ArrayList<String>());
+
+        for (int i = 0; i < numHosts; i++) {
+            shardLists.get(i % numShards).add(hosts.get(i));
+            System.out.println(String.format("Node %d assigned to Shard %d", i, i % numShards));
+        }
+
+        for (int i = 0; i < numShards; i++)
+            shards.add(new Shard(shardLists.get(i), i));
     }
 
 }
