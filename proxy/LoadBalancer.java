@@ -67,7 +67,7 @@ public class LoadBalancer {
 
         for (int i = 0; i < numHosts; i++) {
             shardLists.get(i % numShards).add(hosts.get(i));
-            System.out.println(String.format("Node %d assigned to Shard %d", i, i % numShards));
+            System.out.println(String.format("Node %d (%s) assigned to Shard %d", i, hosts.get(i), i % numShards));
         }
 
         for (int i = 0; i < numShards; i++)
