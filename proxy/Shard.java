@@ -16,26 +16,34 @@ class Shard {
         this.currentHost = 0;
     }
 
-    public Socket forwardReadRequest(byte[] request, int bytesRead, int nodePort) {
-        String host = this.hosts.get(currentHost);
-        System.out.println(
-                String.format("Shard %d received read request, forwarding to host %s\n", this.shardNumber, host));
+    private void setNextHost() {
         this.currentHost = (this.currentHost + 1) % this.hosts.size();
+    }
+
+    public Socket forwardReadRequest(byte[] request, int bytesRead, int nodePort) {
+        System.out.print(String.format("Shard %d received read request, ", this.shardNumber));
         OutputStream streamToNode;
         Socket nodeSocket;
-        try {
-            nodeSocket = new Socket(host, nodePort);
-            streamToNode = nodeSocket.getOutputStream();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        String host;
+
+        // Iterate through hosts until able to make successful connection
+        while (true) {
+            try {
+                this.setNextHost();
+                host = this.hosts.get(currentHost);
+                nodeSocket = new Socket(host, nodePort);
+                streamToNode = nodeSocket.getOutputStream();
+                System.out.print(String.format("forwarding to host %s\n", this.shardNumber, host));
+                break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         try {
             System.out.println(String.format("Shard %d reading from host %s\n", this.shardNumber, host));
             streamToNode.write(request, 0, bytesRead);
             streamToNode.flush();
-            // streamToNode.close();
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -66,12 +74,10 @@ class Shard {
                 OutputStream streamToNode = nodeSocket.getOutputStream();
                 streamToNode.write(request, 0, bytesRead);
                 streamToNode.flush();
-                streamToNode.close();
-			} catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        
 
         return nodeSockets.get(0);
     }
