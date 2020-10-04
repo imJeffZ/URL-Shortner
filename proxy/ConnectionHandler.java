@@ -55,9 +55,10 @@ class ConnectionHandler extends Thread {
             // create the streams to the node.
             streamFromNode = nodeSocket.getInputStream();
             streamToNode = nodeSocket.getOutputStream();
+            
 
             // a new thread to read from client and send to node.
-            new Thread () {
+            new Thread () { 
                 public void run() {
                     int bytesRead;
                     System.out.println("Reading from client. Sending to node at " + node);

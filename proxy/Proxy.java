@@ -55,8 +55,7 @@ public class Proxy {
 
                 // Start the client-to-server request thread running
                 // String nodeHost = loadBalancer.getHost();
-                Shard shard = loadBalancer.getShard();
-                final Thread t = new Thread(new ConnectionHandler(clientSocket, nodeHost, DEPRECATED_NODE_PORT, loadBalancer));
+                final Thread t = new Thread(new ConnectionHandler(clientSocket, loadBalancer, DEPRECATED_NODE_PORT));
                 t.start();
                 System.out.println("thread spawned for new client.");
             } catch (final Exception e) {
