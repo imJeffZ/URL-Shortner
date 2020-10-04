@@ -7,8 +7,8 @@ TODO	1) Long to Short: 2
 DONE	2) Short to Long: 2
 		- 1 Good Request
 		- 1 Bad Request
-TODO	3) Accept any read after any node (max 1) fail: 2
-TODO	4) Accept any write after any node (max 1) fail: 2 
+DONE	3) Accept any read after any node (max 1) fail: 2
+DONE	4) Accept any write after any node (max 1) fail: 2 
 DONE    5) Required components: 2
 		- 1 Load Balancer/Proxy Server
 		- 1 Multithreaded URL Shortener
@@ -23,7 +23,7 @@ DONE		- Is it able to scale horizontally?: 4
 			- 2 fully implemeted
 DONE	2) Consistency: 2
 		- Give marks iff system response with most recent write or an error
-TODO	3) Availability: 7
+DONE	3) Availability: 7
 		- 3 System always gives a response
 		- 4 System always gives the correct response
 DONE	4) Partition Tolerance: 7
