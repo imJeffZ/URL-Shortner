@@ -44,8 +44,10 @@ class Shard {
     public InputStream forwardWriteRequest(byte[] request, int bytesRead, int nodePort) {
         System.out.print(String.format("Shard %d received write request, forwarding to hosts", this.shardNumber));
         for (String host : this.hosts)
-            System.out.print(String.format("%s ", host));
-        System.out.print("\n");
+            System.out.print(String.format(" %s", host));
+        System.out.print(".\n");
+        ArrayList<Socket> nodeSockets = new ArrayList<Socket>();
+        
         return null;
     }
 
