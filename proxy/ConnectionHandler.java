@@ -15,7 +15,6 @@ class ConnectionHandler extends Thread {
     byte[] request;
     byte[] reply;
     InputStream streamFromNode;
-    OutputStream streamToNode;
     private LoadBalancer loadBalancer;
 
     public ConnectionHandler(Socket clientSocket, LoadBalancer loadBalancer, int nodePort) {
@@ -33,25 +32,6 @@ class ConnectionHandler extends Thread {
             streamFromClient = clientSocket.getInputStream();
             streamToClient = clientSocket.getOutputStream();
 
-            // create a socket connection to the node.
-            try {
-                nodeSocket = new Socket(this.node, this.nodePort);
-            } catch (IOException e) {
-                PrintWriter out = new PrintWriter(streamToClient);
-                out.print("Proxy server cannot connect to " + node + ":" + this.nodePort + ":\n" + e + "\n");
-                out.flush();
-                try {
-                    clientSocket.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-                return;
-            }
-
-            // create the streams to the node.
-            streamFromNode = nodeSocket.getInputStream();
-            streamToNode = nodeSocket.getOutputStream();
-
             // a new thread to read from client and send to node.
             new Thread() {
                 public void run() {
@@ -62,7 +42,8 @@ class ConnectionHandler extends Thread {
                         while ((bytesRead = streamFromClient.read(request)) != -1) {
                             totalBytes += bytesRead;
                         }
-                        handleRequest(totalBytes);
+                        nodeSocket = handleRequest(totalBytes);
+                        streamFromNode = nodeSocket.getInputStream();
                         System.out.println("Reading from client complete, closing streamToNode.");
                     } catch (IOException e) {
                     }
@@ -73,7 +54,6 @@ class ConnectionHandler extends Thread {
             // this current thread reads response from node and forwards to client.
             int bytesRead;
             try {
-
                 System.out.println("Reading from node.");
                 while ((bytesRead = streamFromNode.read(reply)) != -1) {
                     streamToClient.write(reply, 0, bytesRead);
@@ -91,6 +71,9 @@ class ConnectionHandler extends Thread {
         }
     }
 
+    /*
+     * close client and socket connection.
+     */
     private void closeConnections() throws IOException {
         if (nodeSocket != null)
             nodeSocket.close();
@@ -100,7 +83,10 @@ class ConnectionHandler extends Thread {
         System.out.println("Close clientsocket.");
     }
 
-    public byte[] handleRequest(int bytesRead) {
+    /*
+     * handle incoming request from client.
+     */
+    public Socket handleRequest(int bytesRead) {
         try {
             ByteArrayInputStream stream = new ByteArrayInputStream(request);
             InputStreamReader streamReader = new InputStreamReader(stream);
@@ -115,31 +101,38 @@ class ConnectionHandler extends Thread {
             Pattern pget = Pattern.compile("^(\\S+)\\s+/(\\S+)\\s+(\\S+)$");
             Matcher mget = pget.matcher(input);
 
-            // out = new PrintWriter(streamToClient);
-            // dataOut = new BufferedOutputStream(streamToClient);
-            byte[] response;
             if (mput.matches()) {
-                System.out.println("PUT REQUEST CAME");
-                String shortResource = mput.group(1);
-                String longResource = mput.group(2);
-                String httpVersion = mput.group(3);
-
-                Shard shard = this.loadBalancer.getShard(shortResource);
-                response = shard.forwardWriteRequest(request, bytesRead, nodePort, streamToClient);
+                return putHandler(mput, bytesRead);
             } else if (mget.matches()) {
-                String method = mget.group(1);
-                String shortResource = mget.group(2);
-                String httpVersion = mget.group(3);
-
-                Shard shard = this.loadBalancer.getShard(shortResource);
-                response = shard.forwardReadRequest(request, bytesRead, );
+                return getHandler(mget, bytesRead);
             } else {
-                response = null;
+                return null;
             }
-            return response;
         } catch (Exception e) {
             System.err.println("request handler error");
             return null;
         }
+    }
+
+    /*
+     * handle put requests from client and send them of to the correct shrad to be
+     * written.
+     */
+    private Socket putHandler(Matcher mput, int bytesRead) {
+        System.out.println("PUT REQUEST CAME");
+        String shortResource = mput.group(1);
+
+        Shard shard = this.loadBalancer.getShard(shortResource);
+        return shard.forwardWriteRequest(request, bytesRead, nodePort);
+    }
+
+    /*
+     * handle get requests from client and send them of to the correct shrad to be
+     * read from.
+     */
+    private Socket getHandler(Matcher mget, int bytesRead) {
+        String shortResource = mget.group(2);
+        Shard shard = this.loadBalancer.getShard(shortResource);
+        return shard.forwardReadRequest(request, bytesRead, nodePort);
     }
 }
