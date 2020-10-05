@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # one time tasks
-CWD="`pwd`";
+CWD=$(pwd)
 echo "waiting for monitoring service to begin."
 USER=$(whoami)
 # while [ ! -f $CWD'/usage.txt' ]
@@ -26,9 +26,18 @@ do
 done
 
 # setup recurring tasks
-crontab -u ${USER} -l > $CWD/crontab
-           /bin/echo "* * * * * /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./healthService' > cron.error
-* * * * * ( sleep 30 ; /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./healthService' > cron.error )" >> $CWD/crontab
+CRONOUT="${CWD}/out/scripts.out"
+rm -rf $CRONOUT
+echo "
+* * * * * /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./healthService' >> ${CRONOUT}
+* * * * * ( sleep 30 ; /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./healthService' >> ${CRONOUT} )
+
+* * * * * /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && python3 dbConsistency.py' >> ${CRONOUT}
+* * * * * ( sleep 30 ; /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && python3 dbConsistency.py' >> ${CRONOUT} )
+
+* * * * * ( sleep 5 ; /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./fixNode' >> ${CRONOUT} )
+* * * * * ( sleep 35 ; /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./fixNode' >> ${CRONOUT} )
+" >> $CWD/crontab
 crontab $CWD/crontab
 rm -rf $CWD/crontab
 

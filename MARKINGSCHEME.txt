@@ -35,14 +35,14 @@ N		[Y/N] 1 Caching
 Disaster recovery: ?/7
 	1) Healthcheck: 3
 Y		[Y/N] 1 Partially implemeted
-N		[Y/N] 1 Fully implemeted
+Y		[Y/N] 1 Fully implemeted
 N		[Y/N] 1 UI implementation
 	2) Application server recovery: 2
 Y		[Y/N] 1 Partially implemeted
-N		[Y/N] 1 Fully implemeted
+Y		[Y/N] 1 Fully implemeted
 	3) Data recovery: 2
-N		[Y/N] 1 Partially implemeted
-N		[Y/N] 1 Fully implemeted
+Y		[Y/N] 1 Partially implemeted
+Y		[Y/N] 1 Fully implemeted
 
 Orchestration: ?/2
 Y	[Y/N] 1 Launch your service onto the given systems

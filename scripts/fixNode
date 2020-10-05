@@ -5,12 +5,15 @@ current_dir=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cat "./healthcheck.txt" > "./healthcheck.fixNode.tmp.txt"
 
 file="./healthcheck.fixNode.tmp.txt"
-while IFS=" " read -r hostname status rest;
+numDown=0
+echo -e "\nRunning Application recovery check 🖥🖥🖥"
+while IFS=" " read -r host status rest;
 do
     if [ "$status" != "UP" ]; then
-        echo "$hostname is DOWN. Restarting..."
-        ssh $hostname cd "$current_dir" && ./startNode
+        echo "$host is DOWN. Restarting....⌛"
+        ssh $host "cd $current_dir && ./startNode"
+        ((numDown++))
     fi
 done < $file
-
+echo "Application recovery check finished. Found and fixed ${numDown} nodes."
 rm -f $file
