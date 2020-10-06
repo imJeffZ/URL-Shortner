@@ -20,6 +20,7 @@ public class CacheHandler {
     private int RedirectPageLength;
     static final File WEB_ROOT = new File(".");
     static final String REDIRECT = "redirect.html";
+    private static final int SIZE = 1000;
     HashMap<String, String> cache = null;
     static final String contentMimeType = "text/html";
 
@@ -40,11 +41,11 @@ public class CacheHandler {
     }
 
     public String checkLocalCache(String shortResource) {
-        System.out.println("Checking local cache");
         String longResource = find(shortResource);
         if (longResource != null) {
             System.out.println("data found on cache.");
             return longResource;
+            // return null;
         } else {
             return null;
         }
@@ -54,7 +55,6 @@ public class CacheHandler {
         PrintWriter out = new PrintWriter(streamToClient);
         BufferedOutputStream dataOut = new BufferedOutputStream(streamToClient);
         try {
-            out.println("HTTP/1.1 301 Moved Permanently");
             out.println("HTTP/1.1 307 Temporary Redirect");
             out.println(longResource);
             out.println("Server: Java HTTP Server/Shortner : 1.0");
@@ -73,7 +73,8 @@ public class CacheHandler {
     }
 
     public void save(String shortURL, String longURL) {
-        this.cache.put(shortURL, longURL);
+        if (this.cache.size() < SIZE)
+            this.cache.put(shortURL, longURL);
     }
 
     public void remove(String shortURL) {

@@ -44,8 +44,6 @@ class ConnectionHandler extends Thread {
                 int bytesRead;
                 // this current thread reads response from node and forwards to client.
                 try {
-                    while (streamFromNode == null)
-                        continue;
                     BufferedReader input;
                     String line;
                     while ((bytesRead = streamFromNode.read(reply)) != -1) {
@@ -55,7 +53,6 @@ class ConnectionHandler extends Thread {
                                 if (line.contains("Location:")) {
                                     System.out.println(String.format("Cached result %s ", incomingReqString));
                                     this.cacheHandler.save(incomingReqString, line);
-                                    break;
                                 }
                                 if (line.isEmpty()) {
                                     break;
@@ -65,11 +62,11 @@ class ConnectionHandler extends Thread {
                         streamToClient.write(reply, 0, bytesRead);
                         streamToClient.flush();
                     }
+                    System.out.println("Done replying to client");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -81,15 +78,15 @@ class ConnectionHandler extends Thread {
      * close client and socket connection.
      */
     private void closeConnections() {
-        if (nodeSocket != null)
-            try {
+        try {
+            if (nodeSocket != null)
                 nodeSocket.close();
-                if (clientSocket != null)
-                    clientSocket.close();
-                System.out.println("Closed Connection to client.");
-            } catch (IOException e) {
-                System.out.println("error closing socket connections.");
-            }
+            if (clientSocket != null)
+                clientSocket.close();
+            System.out.println("Closed Connection to client.");
+        } catch (IOException e) {
+            System.out.println("error closing socket connections.");
+        }
     }
 
     /*
