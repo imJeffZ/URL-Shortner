@@ -16,13 +16,17 @@ class ConnectionHandler extends Thread {
     byte[] reply;
     InputStream streamFromNode;
     private LoadBalancer loadBalancer;
+    private String incomingReqString;
+    private String longResource;
+    private CacheHandler cacheHandler;
 
-    public ConnectionHandler(Socket clientSocket, LoadBalancer loadBalancer, int nodePort) {
+    public ConnectionHandler(Socket clientSocket, LoadBalancer loadBalancer, CacheHandler cacheHandler, int nodePort) {
         this.clientSocket = clientSocket;
         this.nodePort = nodePort;
         this.request = new byte[1024];
         this.reply = new byte[4096];
         this.loadBalancer = loadBalancer;
+        this.cacheHandler = cacheHandler;
     }
 
     @Override
@@ -34,20 +38,38 @@ class ConnectionHandler extends Thread {
 
             int bytesReadIncoming = streamFromClient.read(request);
             nodeSocket = handleRequest(bytesReadIncoming);
-            streamFromNode = nodeSocket.getInputStream();
+            if (nodeSocket != null) {
+                streamFromNode = nodeSocket.getInputStream();
 
-            int bytesRead;
-            // this current thread reads response from node and forwards to client.
-            try {
-                while (streamFromNode == null)
-                    continue;
-                while ((bytesRead = streamFromNode.read(reply)) != -1) {
-                    streamToClient.write(reply, 0, bytesRead);
-                    streamToClient.flush();
+                int bytesRead;
+                // this current thread reads response from node and forwards to client.
+                try {
+                    while (streamFromNode == null)
+                        continue;
+                    BufferedReader input;
+                    String line;
+                    while ((bytesRead = streamFromNode.read(reply)) != -1) {
+                        if (longResource == null) {
+                            input = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(reply)));
+                            while ((line = input.readLine()) != null) {
+                                if (line.contains("Location:")) {
+                                    System.out.println(String.format("Cached result %s ", incomingReqString));
+                                    this.cacheHandler.save(incomingReqString, line);
+                                    break;
+                                }
+                                if (line.isEmpty()) {
+                                    break;
+                                }
+                            }
+                        }
+                        streamToClient.write(reply, 0, bytesRead);
+                        streamToClient.flush();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -106,8 +128,9 @@ class ConnectionHandler extends Thread {
      * written.
      */
     private Socket putHandler(Matcher mput, int bytesRead) {
-        String shortResource = mput.group(1);
 
+        String shortResource = mput.group(1);
+        this.cacheHandler.remove(shortResource);
         Shard shard = this.loadBalancer.getShard(shortResource);
         return shard.forwardWriteRequest(request, bytesRead, nodePort);
     }
@@ -117,8 +140,14 @@ class ConnectionHandler extends Thread {
      * read from.
      */
     private Socket getHandler(Matcher mget, int bytesRead) {
-        String shortResource = mget.group(2);
-        Shard shard = this.loadBalancer.getShard(shortResource);
-        return shard.forwardReadRequest(request, bytesRead, nodePort);
+        incomingReqString = mget.group(2);
+        longResource = this.cacheHandler.checkLocalCache(incomingReqString);
+        if (longResource == null) {
+            Shard shard = this.loadBalancer.getShard(incomingReqString);
+            return shard.forwardReadRequest(request, bytesRead, nodePort);
+        } else {
+            this.cacheHandler.replyToClient(longResource, streamToClient);
+            return null;
+        }
     }
 }

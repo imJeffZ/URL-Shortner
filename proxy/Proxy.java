@@ -7,10 +7,12 @@ public class Proxy {
     private static final int DEPRECATED_NODE_PORT = 8026;
     private static final int PROXY_PORT = 8030;
     private static LoadBalancer loadBalancer;
+    private static CacheHandler cacheHandler;
 
     public static void main(final String[] args) throws IOException {
 
         loadBalancer = new LoadBalancer();
+        cacheHandler = new CacheHandler();
 
         // shardHandlers = new ShardHandler();
         try {
@@ -54,7 +56,8 @@ public class Proxy {
 
                 // Start the client-to-server request thread running
                 // String nodeHost = loadBalancer.getHost();
-                final Thread t = new Thread(new ConnectionHandler(clientSocket, loadBalancer, DEPRECATED_NODE_PORT));
+                final Thread t = new Thread(
+                        new ConnectionHandler(clientSocket, loadBalancer, cacheHandler, DEPRECATED_NODE_PORT));
                 t.start();
             } catch (final Exception e) {
                 clientSocket.close();
