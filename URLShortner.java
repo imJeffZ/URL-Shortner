@@ -61,6 +61,27 @@ public class URLShortner {
 			String input = in.readLine();
 			
 			if(verbose)System.out.println("first line: "+input);
+
+			Pattern pingpattern = Pattern.compile("^(\\S+)\\s+/\\?\\?\\s+(\\S+)$");
+			Matcher pingmatcher = pingpattern.matcher(input);
+			if (pingmatcher.matches()){
+				byte[] response = "OK".getBytes();
+
+				out.println("HTTP/1.1 200 OK");
+				out.println("Content-Length: 2");
+				out.println("Content-Type: text/plain");
+				out.println();
+				out.flush();
+
+				dataOut.write(response, 0, response.length);
+				dataOut.flush();
+				// in.close();
+				// out.close();
+				// connect.close(); // we close socket connection
+
+				// return;
+			}
+
 			Pattern pput = Pattern.compile("^PUT\\s+/\\?short=(\\S+)&long=(\\S+)\\s+(\\S+)$");
 			Matcher mput = pput.matcher(input);
 			if(mput.matches()){

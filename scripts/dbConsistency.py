@@ -33,7 +33,7 @@ def getNumEntries(host: str) -> int:
 
 
 def copyDatabase(fromHost: str, toHost: str) -> None:
-    """ 
+    """
     Copy database found from host with max values to hosts which have less in the same shard.
 
     Return None
