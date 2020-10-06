@@ -3,3 +3,5 @@ proxy/*.class
 # *.txt*
 database.txt
 scripts/out/*
+.vscode
+__pycache__
