@@ -3,3 +3,4 @@ proxy/*.class
 # *.txt*
 database.txt
 scripts/out/*
+.vscode
