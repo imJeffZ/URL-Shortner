@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-class URLShortnerConnectionHandler extends Thread {
+class URLConnectionHandler extends Thread {
     final File WEB_ROOT = new File(".");
 	final String DEFAULT_FILE = "index.html";
 	final String FILE_NOT_FOUND = "404.html";
@@ -30,19 +30,18 @@ class URLShortnerConnectionHandler extends Thread {
 	final String NOT_FOUND = "notfound.html";
     final String DATABASE = "/virtual/database.txt";
 
-    Socket connect;
-    public URLShortnerConnectionHandler(Socket connect) {
-        this.connect = connect;
+    Socket clientSocket;
+    public URLConnectionHandler(Socket clientSocket) {
+        this.clientSocket = clientSocket;
     }
 
     @Override
     public void run() {
-
-    }
-
-    public void handle(Socket connect) {
+        Socket connect = this.clientSocket;
         boolean verbose = true;
-		BufferedReader in = null; PrintWriter out = null; BufferedOutputStream dataOut = null;
+        BufferedReader in = null;
+        PrintWriter out = null;
+        BufferedOutputStream dataOut = null;
 		
 		try {
 			in = new BufferedReader(new InputStreamReader(connect.getInputStream()));
@@ -72,7 +71,7 @@ class URLShortnerConnectionHandler extends Thread {
 				out.println("Date: " + new Date());
 				out.println("Content-type: " + contentMimeType);
 				out.println("Content-length: " + fileLength);
-				out.println(); 
+				out.println();
 				out.flush(); 
 
 				dataOut.write(fileData, 0, fileLength);
@@ -140,8 +139,9 @@ class URLShortnerConnectionHandler extends Thread {
 				System.out.println("Connection closed.\n");
 			}
 		}
-	}
 
+    }
+    
 	private String find(String shortURL){
 		String longURL = null;
 		try {

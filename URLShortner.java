@@ -1,44 +1,41 @@
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.PrintWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URL;
-import java.util.Date;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class URLShortner { 
 	// port to listen connection
-	private static final int PORT = 8026;
-	
-	// verbose mode
-	private static final boolean verbose = true;
+	// 8026
+	private static final int LOCALPORT = 8031;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		try {
-			ServerSocket serverConnect = new ServerSocket(PORT);
-			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
-			
-			// we listen until user halts server execution
-			while (true) {
-				if (verbose) { System.out.println("Connecton opened. (" + new Date() + ")"); }
-				URLShortnerConnectionHandler connectionHandler = new URLShortnerConnectionHandler(serverConnect.accept());
-			}
+			System.out.println("Server started.\nListening for connections on port : " + LOCALPORT + " ...\n");
+			runServer(LOCALPORT); // never return
 		} catch (IOException e) {
 			System.err.println("Server Connection error : " + e.getMessage());
 		}
+	}
+
+	static void runServer(int localport) throws IOException {
+		// Create a ServerSocket to listen for connections with
+		ServerSocket serverConnect = new ServerSocket(localport);
+		// we listen until user halts server execution
+		while (true) {
+			Socket clientSocket = null;
+			try {
+				// Wait for a connection on the local port
+				System.out.println("Waiting for a client ...");
+				clientSocket = serverConnect.accept();
+				System.out.println("Accepted new connection: " + serverConnect);
+				Thread t = new Thread(new URLConnectionHandler(clientSocket));
+				t.start();
+				System.out.println("thread spawned for new client.");
+			} catch (Exception e) {
+				clientSocket.close();
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 }
