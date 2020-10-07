@@ -5,7 +5,7 @@ import java.net.Socket;
 public class URLShortner { 
 	// port to listen connection
 	// 8026
-	private static final int LOCALPORT = 8031;
+	private static final int LOCALPORT = 8026;
 
 	public static void main(String[] args) throws IOException {
 		try {
