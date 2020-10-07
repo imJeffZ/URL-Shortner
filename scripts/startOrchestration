@@ -1,16 +1,23 @@
 #!/bin/bash
 
 # one time tasks
-CWD="`pwd`";
+CWD=$(pwd)
 echo "waiting for monitoring service to begin."
-
+USER=$(whoami)
 # while [ ! -f $CWD'/usage.txt' ]
 # do
 #   sleep 2
 # done
 cd ..
 javac proxy/*.java
-java proxy/Proxy &
+echo "deleting $CWD"
+rm -rf $CWD/out/proxy.*
+
+if [ "$1" == "-t" ]; then
+    java proxy/Proxy >>/dev/null 2>&1 &
+else
+    nohup java proxy/Proxy > $CWD/out/proxy.out 2> $CWD/out/proxy.error < /dev/null &
+fi
 
 javac URLShortner.java
 for host in `cat ./proxy/hosts.txt`
@@ -19,4 +26,19 @@ do
 done
 
 # setup recurring tasks
-crontab ./scripts/cron_schedule
+CRONOUT="${CWD}/out/scripts.out"
+rm -rf $CRONOUT
+echo "
+* * * * * /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./healthService' >> ${CRONOUT}
+* * * * * ( sleep 30 ; /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./healthService' >> ${CRONOUT} )
+
+* * * * * /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && python3 dbConsistency.py' >> ${CRONOUT}
+* * * * * ( sleep 30 ; /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && python3 dbConsistency.py' >> ${CRONOUT} )
+
+* * * * * ( sleep 5 ; /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./fixNode' >> ${CRONOUT} )
+* * * * * ( sleep 35 ; /bin/bash -c 'cd /student/${USER}/csc409/repo_a1group10/scripts && ./fixNode' >> ${CRONOUT} )
+" >> $CWD/crontab
+crontab $CWD/crontab
+rm -rf $CWD/crontab
+
+echo "🚀 started all nodes."

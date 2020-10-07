@@ -1,4 +1,0 @@
-USER=razaal14
-
-* * * * * /bin/bash -c "cd /student/${USER}/csc409/repo_a1group10/scripts && ./healthService" > cron.error
-* * * * * ( sleep 30 ; /bin/bash -c "cd /student/${USER}/csc409/repo_a1group10/scripts && ./healthService" > cron.error )

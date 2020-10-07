@@ -1,5 +1,7 @@
 *.class
 proxy/*.class
-out/*
-*.txt*
+# *.txt*
+database.txt
 scripts/out/*
+.vscode
+__pycache__

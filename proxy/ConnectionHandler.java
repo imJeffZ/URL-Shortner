@@ -2,6 +2,8 @@ package proxy;
 
 import java.io.*;
 import java.net.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class ConnectionHandler extends Thread {
     Socket clientSocket;
@@ -13,14 +15,18 @@ class ConnectionHandler extends Thread {
     byte[] request;
     byte[] reply;
     InputStream streamFromNode;
-    OutputStream streamToNode;
+    private LoadBalancer loadBalancer;
+    private String incomingReqString;
+    private String longResource;
+    private CacheHandler cacheHandler;
 
-    public ConnectionHandler(Socket clientSocket, String node, int nodePort) {
+    public ConnectionHandler(Socket clientSocket, LoadBalancer loadBalancer, CacheHandler cacheHandler, int nodePort) {
         this.clientSocket = clientSocket;
-        this.node = node;
         this.nodePort = nodePort;
         this.request = new byte[1024];
         this.reply = new byte[4096];
+        this.loadBalancer = loadBalancer;
+        this.cacheHandler = cacheHandler;
     }
 
     @Override
@@ -30,70 +36,115 @@ class ConnectionHandler extends Thread {
             streamFromClient = clientSocket.getInputStream();
             streamToClient = clientSocket.getOutputStream();
 
-            // create a socket connection to the node.
-            try {
-                nodeSocket = new Socket(this.node, this.nodePort);
-            } catch (IOException e) {
-                PrintWriter out = new PrintWriter(streamToClient);
-                out.print("Proxy server cannot connect to " + node + ":" + this.nodePort + ":\n" + e + "\n");
-                out.flush();
+            int bytesReadIncoming = streamFromClient.read(request);
+            nodeSocket = handleRequest(bytesReadIncoming);
+            if (nodeSocket != null) {
+                streamFromNode = nodeSocket.getInputStream();
+
+                int bytesRead;
+                // this current thread reads response from node and forwards to client.
                 try {
-                    clientSocket.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-                return;
-            }
-
-            // create the streams to the node.
-            streamFromNode = nodeSocket.getInputStream();
-            streamToNode = nodeSocket.getOutputStream();
-
-            // a new thread to read from client and send to node.
-            new Thread () {
-                public void run() {
-                    int bytesRead;
-                    System.out.println("Reading from client. Sending to node at " + node);
-                    try {
-                        while ((bytesRead = streamFromClient.read(request)) != -1) {
-                            streamToNode.write(request, 0, bytesRead);
-                            streamToNode.flush();
+                    BufferedReader input;
+                    String line;
+                    while ((bytesRead = streamFromNode.read(reply)) != -1) {
+                        if (longResource == null) {
+                            input = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(reply)));
+                            while ((line = input.readLine()) != null) {
+                                if (line.contains("Location:")) {
+                                    System.out.println(String.format("Cached result %s ", incomingReqString));
+                                    this.cacheHandler.save(incomingReqString, line);
+                                }
+                                if (line.isEmpty()) {
+                                    break;
+                                }
+                            }
                         }
-                        System.out.println("Reading from client complete, closing streamToNode.");
-                    } catch (IOException e) {
+                        streamToClient.write(reply, 0, bytesRead);
+                        streamToClient.flush();
                     }
-
-                    try {
-                        streamToNode.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    System.out.println("Done replying to client");
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            }.start();
-
-            // this current thread reads response from node and forwards to client.
-            int bytesRead;
-            try {
-                
-                System.out.println("Reading from node.");
-                while ((bytesRead = streamFromNode.read(reply)) != -1) {
-                    streamToClient.write(reply, 0, bytesRead);
-                    streamToClient.flush();
-                }
-                System.out.println("Wrote to client.");
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (nodeSocket != null)
-                    nodeSocket.close();
-                    System.out.println("Close nodesocket.");
-                if (clientSocket != null)
-                    clientSocket.close();
-                    System.out.println("Close clientsocket.");
             }
-            streamToClient.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            closeConnections();
         }
-    } 
+    }
+
+    /*
+     * close client and socket connection.
+     */
+    private void closeConnections() {
+        try {
+            if (nodeSocket != null)
+                nodeSocket.close();
+            if (clientSocket != null)
+                clientSocket.close();
+            System.out.println("Closed Connection to client.");
+        } catch (IOException e) {
+            System.out.println("error closing socket connections.");
+        }
+    }
+
+    /*
+     * handle incoming request from client.
+     */
+    public Socket handleRequest(int bytesRead) {
+        try {
+            ByteArrayInputStream stream = new ByteArrayInputStream(request);
+            InputStreamReader streamReader = new InputStreamReader(stream);
+            BufferedReader bufferedReader = new BufferedReader(streamReader);
+
+            String input = bufferedReader.readLine();
+            System.out.println("Request: " + input);
+
+            Pattern pput = Pattern.compile("^PUT\\s+/\\?short=(\\S+)&long=(\\S+)\\s+(\\S+)$");
+            Matcher mput = pput.matcher(input);
+
+            Pattern pget = Pattern.compile("^(\\S+)\\s+/(\\S+)\\s+(\\S+)$");
+            Matcher mget = pget.matcher(input);
+
+            if (mput.matches()) {
+                return putHandler(mput, bytesRead);
+            } else if (mget.matches()) {
+                return getHandler(mget, bytesRead);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            System.err.println("request handler error");
+            return null;
+        }
+    }
+
+    /*
+     * handle put requests from client and send them of to the correct shrad to be
+     * written.
+     */
+    private Socket putHandler(Matcher mput, int bytesRead) {
+
+        String shortResource = mput.group(1);
+        this.cacheHandler.remove(shortResource);
+        Shard shard = this.loadBalancer.getShard(shortResource);
+        return shard.forwardWriteRequest(request, bytesRead, nodePort);
+    }
+
+    /*
+     * handle get requests from client and send them of to the correct shrad to be
+     * read from.
+     */
+    private Socket getHandler(Matcher mget, int bytesRead) {
+        incomingReqString = mget.group(2);
+        longResource = this.cacheHandler.checkLocalCache(incomingReqString);
+        if (longResource == null) {
+            Shard shard = this.loadBalancer.getShard(incomingReqString);
+            return shard.forwardReadRequest(request, bytesRead, nodePort);
+        } else {
+            this.cacheHandler.replyToClient(longResource, streamToClient);
+            return null;
+        }
+    }
 }

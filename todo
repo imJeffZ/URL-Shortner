@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # 1.batch writes from master(load balancer) to all nodes every 30s
 # 2. have a service that checks every 30s to get the number of lines present on each node
 #   if lines are less then copy from the node with max lines
@@ -27,3 +25,43 @@
 
 # 1. switch to using CRONjobs
 # 2. cleanup services and move to services/
+
+
+# create a data layer object which knows about each node and also has the hash method
+# implement startup
+
+# manage adding and removing nodes (not automatic).
+
+# python program to handle host adding and removing
+# add a host
+#   if (hosts % 2 == 0 ): // New shard was added
+#       tell java to reassign hosts to shards:
+#           save 1 representative node from each shard
+#           reread nodes from hosts.txt
+#           assign hosts to shards
+#           each representative sends all data through HTTP requests to load balancer
+#   elif (hosts % 2 == 1): // New host belongs to existing shards
+#       tell java to reassign hosts to shards:
+#           reread hosts.txt
+#           assign new node to shard
+#           replicate data (SCP) from existing node within shard
+
+# shard(short) = hash(short)  % (numNodes // 2)
+
+# reading/writing to shard
+# Proxy receives socket connection
+# Sends socket connection to ConnectionHandler with LoadBalancer
+# Connection handler reads request from socket
+# ConnectionHandler gets Shard from LoadBalancer based on short
+# if request == GET:
+#   Shard.read(short) -> byte[]: OR Shard.forwardReadRequest(request , port)
+#       Shard creates its own request using short and sends it to 1 node
+#       returns response to ConnectionHandler
+#   ConnectionHandler creates response to send back to client
+# elif request == PUT
+#   Shard.write(short, long) -> byte[]: OR Shard.forwardWriteRequest(request, port)
+#       Shard creates concurrent requests to send to all nodes
+#       Once one/all nodes respond with 200, return True
+#   ConnectionHandler creates 200/500 response to send back to client
+
+

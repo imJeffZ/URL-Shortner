@@ -1,0 +1,5 @@
+dh2020pc05 DOWN 85584 database.txt
+dh2020pc06 DOWN 85584 database.txt
+dh2020pc07 DOWN 85584 database.txt
+dh2020pc08 UP 85584 database.txt
+dh2020pc09 DOWN 85584 database.txt
