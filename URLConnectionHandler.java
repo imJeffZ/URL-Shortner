@@ -32,9 +32,11 @@ class URLConnectionHandler extends Thread {
 	final String DATABASE = "/virtual/database.txt";
 	final boolean VERBOSE = true;
 
-    Socket clientSocket;
+	Socket clientSocket;
+	URLDataAccessObject urlDAO;
     public URLConnectionHandler(Socket clientSocket) {
-        this.clientSocket = clientSocket;
+		this.clientSocket = clientSocket;
+		this.urlDAO = new URLDataAccessObject();
     }
 
     @Override
@@ -86,17 +88,17 @@ class URLConnectionHandler extends Thread {
 		String httpVersion=mput.group(3);
         PrintWriter out = null;
 		BufferedOutputStream dataOut = null;
-		
+
 		try {
 			out = new PrintWriter(connect.getOutputStream());
 			dataOut = new BufferedOutputStream(connect.getOutputStream());
-			save(shortResource, longResource);
+			this.urlDAO.save(shortResource, longResource);
 
 			File file = new File(WEB_ROOT, REDIRECT_RECORDED);
 			int fileLength = (int) file.length();
 			String contentMimeType = "text/html";
 			//read content to return to client
-			byte[] fileData = readFileData(file, fileLength);
+			byte[] fileData = this.urlDAO.readFileData(file, fileLength);
 				
 			out.println("HTTP/1.1 200 OK");
 			out.println("Server: Java HTTP Server/Shortner : 1.0");
@@ -104,7 +106,7 @@ class URLConnectionHandler extends Thread {
 			out.println("Content-type: " + contentMimeType);
 			out.println("Content-length: " + fileLength);
 			out.println();
-			out.flush(); 
+			out.flush();
 
 			dataOut.write(fileData, 0, fileLength);
 			dataOut.flush();
@@ -128,7 +130,7 @@ class URLConnectionHandler extends Thread {
 		String method = mget.group(1);
 		String shortResource = mget.group(2);
 		String httpVersion = mget.group(3);
-		String longResource = find(shortResource);
+		String longResource = this.urlDAO.find(shortResource);
 
 		if (longResource == null) {
 			notFoundHandler(connect);
@@ -149,7 +151,7 @@ class URLConnectionHandler extends Thread {
 			out = new PrintWriter(connect.getOutputStream());
 			dataOut = new BufferedOutputStream(connect.getOutputStream());
 			//read content to return to client
-			byte[] fileData = readFileData(file, fileLength);
+			byte[] fileData = this.urlDAO.readFileData(file, fileLength);
 
 			
 			// out.println("HTTP/1.1 301 Moved Permanently");
@@ -178,7 +180,7 @@ class URLConnectionHandler extends Thread {
 			File file = new File(WEB_ROOT, FILE_NOT_FOUND);
 			int fileLength = (int) file.length();
 			String content = "text/html";
-			byte[] fileData = readFileData(file, fileLength);
+			byte[] fileData = this.urlDAO.readFileData(file, fileLength);
 				
 			out = new PrintWriter(connect.getOutputStream());
 			dataOut = new BufferedOutputStream(connect.getOutputStream());
@@ -202,60 +204,10 @@ class URLConnectionHandler extends Thread {
 
 	// private String longToShort(String longURL) {
     //     CRC32 crc = new CRC32();
-    //     crc.update(longURL.getBytes());
+	// 	crc.update(longURL.getBytes());
 	// 	String shortURL = Long.toHexString(crc.getValue());
     //     return shortURL;
 	// }
-    
-	private String find(String shortURL){
-		String longURL = null;
-		try {
-			File file = new File(DATABASE);
-			FileReader fileReader = new FileReader(file);
-			BufferedReader bufferedReader = new BufferedReader(fileReader);
-			String line;
-			while ((line = bufferedReader.readLine()) != null) {
-				String [] map = line.split("\t");
-				if(map[0].equals(shortURL)){
-					longURL = map[1];
-					break;
-				}
-			}
-			fileReader.close();
-		} catch (IOException e) {
-			
-		} 
-		return longURL;
-	}
-
-	private void save(String shortURL, String longURL) {
-		try {
-			File file = new File(DATABASE);
-			FileWriter fw = new FileWriter(file, true);
-			BufferedWriter bw = new BufferedWriter(fw);
-			PrintWriter pw = new PrintWriter(bw);
-			pw.println(shortURL + "\t" + longURL);
-			pw.close();
-		} catch (IOException e) {
-			
-		} 
-		return;
-	}
-	
-	private byte[] readFileData(File file, int fileLength) throws IOException {
-		FileInputStream fileIn = null;
-		byte[] fileData = new byte[fileLength];
-		
-		try {
-			fileIn = new FileInputStream(file);
-			fileIn.read(fileData);
-		} finally {
-			if (fileIn != null) 
-				fileIn.close();
-		}
-		
-		return fileData;
-	}
 
 
 }
