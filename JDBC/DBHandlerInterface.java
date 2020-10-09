@@ -8,4 +8,6 @@ public interface DBHandlerInterface {
   public String findURL(String shortURL) throws SQLException;
 
   public int dbCount() throws SQLException;
+
+  public void delete(String shortURL) throws SQLException;
 }

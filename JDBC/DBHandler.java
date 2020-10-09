@@ -52,6 +52,13 @@ public class DBHandler implements DBHandlerInterface {
         }
     }
 
+    /**
+     * find a shortURL return the corresponding long.
+     *
+     * @param shortURL
+     * @param longURL
+     * @throws SQLException
+     */
     @Override
     public void saveURL(String shortURL, String longURL) throws SQLException {
 
@@ -66,6 +73,13 @@ public class DBHandler implements DBHandlerInterface {
 
     }
 
+    /**
+     * find a shortURL return the corresponding long.
+     *
+     * @param shortURL
+     * @throws SQLException
+     * @return corresponding long
+     */
     @Override
     public String findURL(String shortURL) throws SQLException {
         String longURL = null;
@@ -85,6 +99,11 @@ public class DBHandler implements DBHandlerInterface {
         return longURL;
     }
 
+    /**
+     * Get the short count in the DB.
+     *
+     * @throws SQLException
+     */
     @Override
     public int dbCount() throws SQLException {
         String sql = "SELECT COUNT(short) AS count FROM URLSHORTNER;";
@@ -98,6 +117,25 @@ public class DBHandler implements DBHandlerInterface {
         return count;
     }
 
+    /**
+     * Delete a shortURL
+     *
+     * @param shortURL
+     * @throws SQLException
+     */
+    @Override
+    public void delete(String shortURL) throws SQLException {
+        String sql = "DELETE FROM URLSHORTNER WHERE short = ?";
+
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, shortURL);
+        pstmt.executeUpdate();
+    }
+
+    /**
+     * Get the db connection
+     *
+     */
     public Connection getConnection() {
         return this.conn;
     }
