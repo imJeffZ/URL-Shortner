@@ -19,7 +19,8 @@ else
     nohup java proxy/Proxy > $CWD/out/proxy.out 2> $CWD/out/proxy.error < /dev/null &
 fi
 
-javac URLShortner.java
+javac -classpath ".:sqlite-jdbc-3.32.3.2.jar" JDBC/*.java
+javac ./*.java
 for host in `cat ./proxy/hosts.txt`
 do
 	ssh $host "cd \"$CWD\"; ./startNode"

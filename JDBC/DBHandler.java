@@ -15,7 +15,7 @@ public class DBHandler implements DBHandlerInterface {
     private static final String PATH = String.format("/virtual/%s/URLShortner", System.getProperty("user.name"));
     Statement stmt;
 
-    static Connection connect(String url) {
+    private static Connection connect(String url) {
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -47,6 +47,8 @@ public class DBHandler implements DBHandlerInterface {
 
         try {
             sql = "INSERT INTO URLSHORTNER (SHORT,LONG) " + "VALUES ('gg', 'http://www.google.com' );";
+            stmt.executeUpdate(sql);
+            sql = "INSERT INTO URLSHORTNER (SHORT,LONG) " + "VALUES ('ali', 'http://ali-raza.me' );";
             stmt.executeUpdate(sql);
         } catch (Exception e) {
         }

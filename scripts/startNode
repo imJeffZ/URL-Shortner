@@ -12,5 +12,6 @@ fi
 
 # NEED TO FIX (SEND THREAD COUNT INTO URLShortner to make use of maximum threads)
 cd ..
-nohup java URLShortner $2 > ./scripts/out/service$1.out 2>./scripts/out/service$1.error < /dev/null &
-echo $! > ./scripts/out/service$1.pid;
+java -classpath ".:sqlite-jdbc-3.32.3.2.jar" JDBC/DbInit > ./scripts/out/service$(hostname).out 2>./scripts/out/service$(hostname).error < /dev/null
+java -classpath ".:sqlite-jdbc-3.32.3.2.jar" URLShortner > ./scripts/out/service$(hostname).out 2>./scripts/out/service$(hostname).error < /dev/null &
+echo $! > ./scripts/out/service$(hostname).pid;

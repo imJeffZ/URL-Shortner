@@ -8,23 +8,21 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import JDBC.DBHandler;
+
 class URLConnectionHandler extends Thread {
-	final File WEB_ROOT = new File(".");
-	final String DEFAULT_FILE = "index.html";
-	final String FILE_NOT_FOUND = "404.html";
-	final String METHOD_NOT_SUPPORTED = "not_supported.html";
-	final String REDIRECT_RECORDED = "redirect_recorded.html";
-	final String REDIRECT = "redirect.html";
-	final String NOT_FOUND = "notfound.html";
-	final String DATABASE = "/virtual/database.txt";
+
 	final boolean VERBOSE = true;
 
 	Socket clientSocket;
 	URLDataAccessObject urlDAO;
+	URLResponseInit resFiles;
+	private static String contentMimeType = "text/html";
 
-	public URLConnectionHandler(Socket clientSocket) {
+	public URLConnectionHandler(Socket clientSocket, DBHandler db, URLResponseInit resFiles) {
 		this.clientSocket = clientSocket;
-		this.urlDAO = new URLDataAccessObject();
+		this.urlDAO = new URLDataAccessObject(db);
+		this.resFiles = resFiles;
 	}
 
 	@Override
@@ -79,21 +77,15 @@ class URLConnectionHandler extends Thread {
 			dataOut = new BufferedOutputStream(connect.getOutputStream());
 			this.urlDAO.save(shortResource, longResource);
 
-			File file = new File(WEB_ROOT, REDIRECT_RECORDED);
-			int fileLength = (int) file.length();
-			String contentMimeType = "text/html";
-			// read content to return to client
-			byte[] fileData = this.urlDAO.readFileData(file, fileLength);
-
 			out.println("HTTP/1.1 200 OK");
 			out.println("Server: Java HTTP Server/Shortner : 1.0");
 			out.println("Date: " + new Date());
 			out.println("Content-type: " + contentMimeType);
-			out.println("Content-length: " + fileLength);
+			out.println("Content-length: " + resFiles.getRedirectRecordedPageLength());
 			out.println();
 			out.flush();
 
-			dataOut.write(fileData, 0, fileLength);
+			dataOut.write(resFiles.getRedirectRecordedPage(), 0, resFiles.getRedirectRecordedPageLength());
 			dataOut.flush();
 		} catch (Exception e) {
 			System.err.println("Server error");
@@ -125,14 +117,8 @@ class URLConnectionHandler extends Thread {
 
 		try {
 
-			File file = new File(WEB_ROOT, REDIRECT);
-			int fileLength = (int) file.length();
-			String contentMimeType = "text/html";
-
 			out = new PrintWriter(connect.getOutputStream());
 			dataOut = new BufferedOutputStream(connect.getOutputStream());
-			// read content to return to client
-			byte[] fileData = this.urlDAO.readFileData(file, fileLength);
 
 			// out.println("HTTP/1.1 301 Moved Permanently");
 			out.println("HTTP/1.1 307 Temporary Redirect");
@@ -140,11 +126,11 @@ class URLConnectionHandler extends Thread {
 			out.println("Server: Java HTTP Server/Shortner : 1.0");
 			out.println("Date: " + new Date());
 			out.println("Content-type: " + contentMimeType);
-			out.println("Content-length: " + fileLength);
+			out.println("Content-length: " + resFiles.getRedirectPageLength());
 			out.println();
 			out.flush();
 
-			dataOut.write(fileData, 0, fileLength);
+			dataOut.write(resFiles.getRedirectPage(), 0, resFiles.getRedirectPageLength());
 			dataOut.flush();
 		} catch (Exception e) {
 			System.err.println("Server error");
@@ -156,24 +142,18 @@ class URLConnectionHandler extends Thread {
 		PrintWriter out = null;
 		BufferedOutputStream dataOut = null;
 		try {
-
-			File file = new File(WEB_ROOT, FILE_NOT_FOUND);
-			int fileLength = (int) file.length();
-			String content = "text/html";
-			byte[] fileData = this.urlDAO.readFileData(file, fileLength);
-
 			out = new PrintWriter(connect.getOutputStream());
 			dataOut = new BufferedOutputStream(connect.getOutputStream());
 
 			out.println("HTTP/1.1 404 File Not Found");
 			out.println("Server: Java HTTP Server/Shortner : 1.0");
 			out.println("Date: " + new Date());
-			out.println("Content-type: " + content);
-			out.println("Content-length: " + fileLength);
+			out.println("Content-type: " + contentMimeType);
+			out.println("Content-length: " + resFiles.getNotFoundPageLength());
 			out.println();
 			out.flush();
 
-			dataOut.write(fileData, 0, fileLength);
+			dataOut.write(resFiles.getNotFoundPage(), 0, resFiles.getNotFoundPageLength());
 			dataOut.flush();
 		} catch (Exception e) {
 			System.err.println("Server error");

@@ -2,7 +2,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class URLShortner { 
+import JDBC.DBHandler;
+
+public class URLShortner {
 	// port to listen connection
 	private static final int LOCALPORT = 8026;
 
@@ -18,6 +20,8 @@ public class URLShortner {
 	static void runServer(int localport) throws IOException {
 		// Create a ServerSocket to listen for connections with
 		ServerSocket serverConnect = new ServerSocket(localport);
+		DBHandler db = new DBHandler();
+		URLResponseInit resFiles = new URLResponseInit();
 		// we listen until user halts server execution
 		while (true) {
 			Socket clientSocket = null;
@@ -26,7 +30,7 @@ public class URLShortner {
 				System.out.println("Waiting for a client ...");
 				clientSocket = serverConnect.accept();
 				System.out.println("Accepted new connection: " + serverConnect);
-				Thread t = new Thread(new URLConnectionHandler(clientSocket));
+				Thread t = new Thread(new URLConnectionHandler(clientSocket, db, resFiles));
 				t.start();
 				System.out.println("thread spawned for new client.");
 			} catch (Exception e) {
