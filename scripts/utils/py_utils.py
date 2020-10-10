@@ -2,6 +2,8 @@ from typing import *
 import os
 import requests
 
+HOSTS_FILE_PATH = "../proxy/hosts.txt"
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -12,7 +14,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-def readHosts(path: str = "../proxy/hosts.txt") -> List[str]:
+def readHosts(path: str = HOSTS_FILE_PATH) -> List[str]:
     """
     Read hosts from hosts file.
     """
@@ -20,6 +22,14 @@ def readHosts(path: str = "../proxy/hosts.txt") -> List[str]:
     with open(path, "r") as hosts_file:
         hosts = [line.rstrip() for line in hosts_file]
     return hosts
+
+def addHostToFile(hostName: str, path: str = HOSTS_FILE_PATH) -> None:
+    """
+    Add hostName to hosts.txt file on a new line
+    """
+    with open(path, "a") as hosts_file:
+        hosts_file.write(f"{hostName}\n")
+    return None
 
 
 def getShardsFromHosts(hosts: List[str]) -> Dict[int, str]:

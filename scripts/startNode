@@ -1,17 +1,13 @@
 #!/bin/bash
 echo "Starting on "$(hostname)
-CORES=$(lscpu | egrep 'Core\(s\)' | awk '{print $4}')
-THREADS=$(lscpu | egrep 'Thread' | awk '{print $4}')
-SOCKETS=$(lscpu | egrep 'Socket' | awk '{print $2}')
-
-TOTAL_THREADS=$(( CORES*THREADS*SOCKETS ))
-
-if [[ TOTAL_THREADS -eq 0 ]];then
-    TOTAL_THREADS=4
+LOCALPORT=$2
+DBLOCATION=$3
+cd ..
+if [ "$1" == "-d" ]; then
+    java -classpath ".:sqlite-jdbc-3.32.3.2.jar" URLShortner $LOCALPORT $DBLOCATION &> /dev/null &
+else
+    java -classpath ".:sqlite-jdbc-3.32.3.2.jar" JDBC/DbInit > ./scripts/out/service$(hostname).out 2>./scripts/out/service$(hostname).error < /dev/null
+    java -classpath ".:sqlite-jdbc-3.32.3.2.jar" URLShortner > ./scripts/out/service$(hostname).out 2>./scripts/out/service$(hostname).error < /dev/null &
+    echo $! > ./scripts/out/service$(hostname).pid;
 fi
 
-# NEED TO FIX (SEND THREAD COUNT INTO URLShortner to make use of maximum threads)
-cd ..
-java -classpath ".:sqlite-jdbc-3.32.3.2.jar" JDBC/DbInit > ./scripts/out/service$(hostname).out 2>./scripts/out/service$(hostname).error < /dev/null
-java -classpath ".:sqlite-jdbc-3.32.3.2.jar" URLShortner > ./scripts/out/service$(hostname).out 2>./scripts/out/service$(hostname).error < /dev/null &
-echo $! > ./scripts/out/service$(hostname).pid;
