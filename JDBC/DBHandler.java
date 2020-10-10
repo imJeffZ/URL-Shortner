@@ -12,14 +12,14 @@ public class DBHandler implements DBHandlerInterface {
 
     private Connection conn;
 
-    private static final String PATH = String.format("/virtual/%s/URLShortner", System.getProperty("user.name"));
+    public static final String PATH = String.format("/virtual/%s/URLShortner", System.getProperty("user.name"));
     Statement stmt;
 
-    private static Connection connect(String url) {
+    public static Connection connect(String url) {
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(true);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
