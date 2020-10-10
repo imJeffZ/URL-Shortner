@@ -47,7 +47,7 @@ class URLConnectionHandler extends Thread {
 			} else if (mget.matches()) {
 				getHandler(mget, connect);
 			} else {
-				notFoundHandler(connect);
+				badRequestHandler(connect);
 			}
 		} catch (Exception e) {
 			System.err.println("Server error");
@@ -154,6 +154,29 @@ class URLConnectionHandler extends Thread {
 			out.flush();
 
 			dataOut.write(resFiles.getNotFoundPage(), 0, resFiles.getNotFoundPageLength());
+			dataOut.flush();
+		} catch (Exception e) {
+			System.err.println("Server error");
+			out.close();
+		}
+	}
+
+	private void badRequestHandler(Socket connect) {
+		PrintWriter out = null;
+		BufferedOutputStream dataOut = null;
+		try {
+			out = new PrintWriter(connect.getOutputStream());
+			dataOut = new BufferedOutputStream(connect.getOutputStream());
+
+			out.println("HTTP/1.1 400 File Not Found");
+			out.println("Server: Java HTTP Server/Shortner : 1.0");
+			out.println("Date: " + new Date());
+			out.println("Content-type: " + contentMimeType);
+			out.println("Content-length: " + resFiles.getBadRequestPageLength());
+			out.println();
+			out.flush();
+
+			dataOut.write(resFiles.getBadRequestPage(), 0, resFiles.getBadRequestPageLength());
 			dataOut.flush();
 		} catch (Exception e) {
 			System.err.println("Server error");
