@@ -65,3 +65,18 @@
 #   ConnectionHandler creates 200/500 response to send back to client
 
 
+# python program takes in node(node that we are trying to add.)
+    looks at host.txt file
+    save representative(master) nodes 
+    add node to host.txt
+    start URLShortner on new node
+    run redistribute proxy (reads from new host file)
+    all master nodes send data to redistribute proxydis
+
+# python program takes in node(node that we are trying to add.)
+    looks at host.txt file
+    save representative(master) nodes 
+    add node to host.txt
+    start URLShortner on new node
+    run redistribute proxy (reads from new host file)
+    all master nodes send data to redistribute proxy which is connected to URLShortnerResdribute (write method) new test.db

@@ -4,14 +4,14 @@ Functionality: ?/4
 	1) Long to Short: 2
 N		[Y/N] 1 Good Request
 N		[Y/N] 1 Bad Request
-	2) Short to Long: 2
-Y		[Y/N] 1 Good Request
-Y		[Y/N] 1 Bad Request
+	2) Short to Long: 2 (ALWAYS ERROR)
+N		[Y/N] 1 Good Request
+N		[Y/N] 1 Bad Request
 
 Architecture: ?/18
 	1) Scalability: 4
 		- Is it able to scale vertically?: 2
-N			[Y/N] 2 Works
+Y			[Y/N] 2 Works
 			- If not, how much effort to implement
 				[Y/N] 0.5 if simple
 		- Is it able to scale horizontally?: 2
@@ -19,7 +19,7 @@ Y			[Y/N] 2 Works
 			- If not, how much effort to implement
 				[Y/N] 0.5 if simple
 	2) Consistency: 2
-Y		[Y/N] 2 System response with most recent write or an error
+N		[Y/N] 2 System response with most recent write or an error
 	3) Availability: 2
 Y		[Y/N] 2 System always gives a response
 	4) Partition Tolerance: 6
@@ -28,21 +28,21 @@ Y		[Y/N] 2 Accept read after any node fail
 Y		[Y/N] 2 Accept write after any node fail
 	5) Required components: 4
 Y		[Y/N] 1 Load Balancer/Proxy Server
-N		[Y/N] 1 Multithreaded URL Shortener
+Y		[Y/N] 1 Multithreaded URL Shortener
 Y		[Y/N] 1 Logging
-N		[Y/N] 1 Caching
+Y		[Y/N] 1 Caching
 
 Disaster recovery: ?/7
 	1) Healthcheck: 3
 Y		[Y/N] 1 Partially implemeted
-Y		[Y/N] 1 Fully implemeted
-N		[Y/N] 1 UI implementation
+N		[Y/N] 1 Fully implemeted
+Y		[Y/N] 1 UI implementation
 	2) Application server recovery: 2
 Y		[Y/N] 1 Partially implemeted
 Y		[Y/N] 1 Fully implemeted
 	3) Data recovery: 2
-Y		[Y/N] 1 Partially implemeted
-Y		[Y/N] 1 Fully implemeted
+N		[Y/N] 1 Partially implemeted
+N		[Y/N] 1 Fully implemeted
 
 Orchestration: ?/2
 Y	[Y/N] 1 Launch your service onto the given systems

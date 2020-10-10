@@ -1,7 +1,8 @@
 from typing import *
 import subprocess
 from utils.py_utils import *
-
+import getpass
+import os
 
 def getNumEntries(host: str) -> int:
     """
@@ -11,17 +12,14 @@ def getNumEntries(host: str) -> int:
     """
 
     try:
+        path = f"{os.getcwd()}/utils/db_utils.py"
         return int(
             subprocess.check_output(
                 [
                     "ssh",
                     host,
-                    "wc",
-                    "-l",
-                    "/virtual/database.txt",
-                    "|",
-                    "awk",
-                    "'{print $1}'",
+                    "python3",
+                    path,
                 ],
                 stderr=subprocess.STDOUT,
             )
@@ -38,14 +36,14 @@ def copyDatabase(fromHost: str, toHost: str) -> None:
 
     Return None
     """
-
+    path = f"/virtual/{getpass.getuser()}/URLShortner/urlshortner.db"
     subprocess.check_output(
         [
             "ssh",
             fromHost,
             "scp",
-            "/virtual/database.txt",
-            f"{toHost}:/virtual/database.txt",
+            path,
+            f"{toHost}:{path}",
         ],
         stderr=subprocess.STDOUT,
     )
