@@ -7,18 +7,19 @@ public class URLResponseInit {
     static final File WEB_ROOT = new File(".");
     static final String DEFAULT_FILE = "index.html";
     static final String FILE_NOT_FOUND = "404.html";
-    static final String METHOD_NOT_SUPPORTED = "not_supported.html";
+    static final String BAD_REQUST = "400.html";
     static final String REDIRECT_RECORDED = "redirect_recorded.html";
     static final String REDIRECT = "redirect.html";
-    static final String NOT_FOUND = "notfound.html";
 
     private byte[] RedirectPage;
     private byte[] RedirectRecordedPage;
     private byte[] NotFoundPage;
+    private byte[] BadRequestPage;
 
     private int RedirectPageLength;
     private int RedirectRecordedPageLength;
     private int NotFoundPageLength;
+    private int BadRequestPageLength;
 
     public URLResponseInit() {
         try {
@@ -26,6 +27,14 @@ public class URLResponseInit {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public int getBadRequestPageLength() {
+        return BadRequestPageLength;
+    }
+
+    public byte[] getBadRequestPage() {
+        return BadRequestPage;
     }
 
     public int getNotFoundPageLength() {
@@ -46,6 +55,10 @@ public class URLResponseInit {
 
     private void setNotFoundPage(byte[] notFoundPage) {
         this.NotFoundPage = notFoundPage;
+    }
+
+    private void setBadRequestPage(byte[] badRequestPage) {
+        this.BadRequestPage = badRequestPage;
     }
 
     public byte[] getRedirectRecordedPage() {
@@ -79,6 +92,11 @@ public class URLResponseInit {
         file = new File(WEB_ROOT, FILE_NOT_FOUND);
         this.NotFoundPageLength = (int) file.length();
         this.setNotFoundPage(readFileData(file, this.NotFoundPageLength));
+
+        // BADREQUEST file init
+        file = new File(WEB_ROOT, BAD_REQUST);
+        this.BadRequestPageLength = (int) file.length();
+        this.setBadRequestPage(readFileData(file, this.BadRequestPageLength));
     }
 
     private static byte[] readFileData(File file, int fileLength) throws IOException {
