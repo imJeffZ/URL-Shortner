@@ -1,9 +1,10 @@
 *.class
 proxy/*.class
-# *.txt*
+*.txt*
 database.txt
 scripts/out/*.out
 scripts/out/*.pid
 scripts/out/*.error
 .vscode
 __pycache__
+scripts/crontab
