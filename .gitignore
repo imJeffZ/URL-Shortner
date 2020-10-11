@@ -5,5 +5,6 @@ database.txt
 scripts/out/*.out
 scripts/out/*.pid
 scripts/out/*.error
+performanceTesting/out/*.out
 .vscode
 __pycache__
