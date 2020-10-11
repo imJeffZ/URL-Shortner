@@ -1,0 +1,13 @@
+#!/bin/bash
+test_type=$1
+proxy_host=$2
+read_tests=$3
+write_tests=$4
+if [ "$test_type" == "random" ]; then
+    test_file="random_tests.py"
+elif [ "$test_type" == "cache" ]; then
+    test_file="cache_tests.py"
+else
+    echo "unknown test type"
+    exit 1
+python3 $test_file $proxy_host $read_tests $write_tests > ./out/$(hostname).out &
