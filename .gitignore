@@ -5,6 +5,8 @@ database.txt
 scripts/out/*.out
 scripts/out/*.pid
 scripts/out/*.error
+urlshortner/*.class
+JDBC/*.class
 .vscode
 __pycache__
 scripts/crontab

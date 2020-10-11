@@ -23,7 +23,7 @@ fi
 # compile JDBC
 javac -classpath ".:sqlite-jdbc-3.32.3.2.jar" JDBC/*.java
 # compile URLShortner
-javac $CWD/../*.java
+javac $CWD/../urlshortner/*.java
 
 for host in `cat $CWD/../proxy/hosts.txt`
 do
