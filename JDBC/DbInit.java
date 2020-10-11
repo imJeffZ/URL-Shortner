@@ -15,7 +15,7 @@ public class DbInit {
 
     try {
 
-      DBHandler dbHandler = new DBHandler(String.format("jdbc:sqlite:%s/urlshortner.db", PATH));
+      DBHandler dbHandler = new DBHandler(String.format("%s/urlshortner.db", PATH));
 
       System.out.println("short = " + "gg" + " long = " + dbHandler.findURL("gg"));
       System.out.println(String.format("DB Rows count = %d", dbHandler.dbCount()));

@@ -52,8 +52,10 @@ class URLConnectionHandler extends Thread {
 					badRequestHandler(connect);
 				}
 			// otherwise treat as a get request
-			} else {
+			} else if(mget.matches()) {
 				getHandler(mget, connect);
+			} else {
+				badRequestHandler(connect);
 			}
 		} catch (Exception e) {
 			System.err.println("Server error");
