@@ -64,8 +64,8 @@ N	[Y/N] 1 Proper Names. Classes, variables, functions
 Y	[Y/N] 1 Structure. Proper use of classes, functions, resources
 
 Fix URLShortner code into a package. 30 min
-Delete out folder on main folder.	1 min
-clean up addNode.py
+Delete out folder on main folder.	1 min	DONE
+clean up addNode.py 						DONE
 Add comments to all scripts (what they are meant for at the top)
 Proxy add function descriptions
 JDBC INIT add comments and interface
