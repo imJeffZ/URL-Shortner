@@ -10,6 +10,10 @@ def getDBCount(cursor):
     select = "SELECT COUNT(short) AS count FROM URLSHORTNER"
     for raw in cursor.execute(select):
         return raw[0]
+
+def getAllData(cursor):
+    select = "SELECT * FROM URLSHORTNER"
+    return [tup for tup in cursor.execute(select)]
     
 if __name__ == "__main__":
     conn = createDbConn()

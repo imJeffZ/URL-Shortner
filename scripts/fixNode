@@ -1,17 +1,16 @@
 #!/bin/bash
 
-current_dir=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cat "${CWD}/healthcheck.txt" > "${CWD}/healthcheck.fixNode.tmp.txt"
 
-cat "./healthcheck.txt" > "./healthcheck.fixNode.tmp.txt"
-
-file="./healthcheck.fixNode.tmp.txt"
+file="${CWD}/healthcheck.fixNode.tmp.txt"
 numDown=0
 echo -e "\nRunning Application recovery check 🖥🖥🖥"
 while IFS=" " read -r host status rest;
 do
     if [ "$status" != "UP" ]; then
         echo "$host is DOWN. Restarting....⌛"
-        ssh $host "cd $current_dir && ./startNode"
+        ssh $host "${CWD}/startNode"
         ((numDown++))
     fi
 done < $file

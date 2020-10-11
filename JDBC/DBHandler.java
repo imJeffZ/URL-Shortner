@@ -12,7 +12,6 @@ public class DBHandler implements DBHandlerInterface {
 
     private Connection conn;
 
-    public static final String PATH = String.format("/virtual/%s/URLShortner", System.getProperty("user.name"));
     Statement stmt;
 
     public static Connection connect(String url) {
@@ -27,8 +26,8 @@ public class DBHandler implements DBHandlerInterface {
         return conn;
     }
 
-    public DBHandler() {
-        this.conn = connect(String.format("jdbc:sqlite:%s/urlshortner.db", PATH));
+    public DBHandler(String dbPath) {
+        this.conn = connect(String.format("jdbc:sqlite:%s", dbPath));
 
         try {
             this.stmt = conn.createStatement();
