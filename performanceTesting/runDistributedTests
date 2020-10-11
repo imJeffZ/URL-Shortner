@@ -8,15 +8,17 @@ total_write_tests=$4
 num_hosts=$(wc -w $HOST_FILE | awk '{print $1}')
 
 read_tests_per_host=$(expr $total_read_tests / $num_hosts)
-write_tests_per_host=$(expr $total_write_tests / $num_hosts)
 
 for host in `cat ./hosts.txt`
 do
     if [ $test_type == "random" ]; then
+        write_tests_per_host=$(expr $total_write_tests / $num_hosts)
         echo "$host sending random $read_tests_per_host "read" tests and $write_tests_per_host "write" tests to $proxy_host"
+        ssh $host "cd $CWD; ./runLocalTests $test_type $proxy_host $read_tests_per_host $write_tests_per_host"
     elif [ $test_type == "cache" ]; then
         echo "$host sending $read_tests_per_host "read" tests to $proxy_host"
+        ssh $host "cd $CWD; ./runLocalTests $test_type $proxy_host $read_tests_per_host"
     else
         echo "unknown test type"
-	ssh $host "cd $CWD; ./runLocalTests $test_type $proxy_host $read_tests_per_host $write_tests_per_host"
+	fi
 done
