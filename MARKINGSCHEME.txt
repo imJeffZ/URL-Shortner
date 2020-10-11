@@ -2,11 +2,11 @@ URL Shortner: ?/40
 
 Functionality: ?/4
 	1) Long to Short: 2
-N		[Y/N] 1 Good Request
-N		[Y/N] 1 Bad Request
-	2) Short to Long: 2 (ALWAYS ERROR)		Ali
-N		[Y/N] 1 Good Request
-N		[Y/N] 1 Bad Request
+Y		[Y/N] 1 Good Request
+Y		[Y/N] 1 Bad Request
+	2) Short to Long: 2 (ALWAYS ERROR)
+Y		[Y/N] 1 Good Request
+Y		[Y/N] 1 Bad Request
 
 Architecture: ?/18
 	1) Scalability: 4
@@ -63,7 +63,7 @@ N	[Y/N] 1 Clean code. No commented out code, proper indentation
 N	[Y/N] 1 Proper Names. Classes, variables, functions
 Y	[Y/N] 1 Structure. Proper use of classes, functions, resources
 
-Fix URLShortner code into a package. 30 min
+Fix URLShortner code into a package. 30 min	DONE
 Delete out folder on main folder.	1 min	DONE
 clean up addNode.py 						DONE
 Add comments to all scripts (what they are meant for at the top)
