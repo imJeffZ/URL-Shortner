@@ -30,60 +30,48 @@ if __name__ == "__main__":
                     help='The host name (or IP address) of the node.')
     args = parser.parse_args()
     new_host = args.hostName
-    # get current shards
-    # get 1 representative from each shard
-    # add node to host.txt
-    # start URLShortner on new node
     print(f"Adding worker node {new_host}")
+
     old_hosts = utils.readHosts()
     old_shards = utils.getShardsFromHosts(old_hosts)
     representative_nodes = [shard[0] for shard in old_shards.values()]
-    print(f"Chose representative (master) nodes f{representative_nodes}")
-
+    print(f"Chose representative (master) nodes {representative_nodes}")
 
     for host in [*old_hosts, new_host]:
         print(f"Adding {host} to {ALT_HOSTS_FILEPATH}")
         utils.addHostToFile(host, path=ALT_HOSTS_FILEPATH)
 
-
     print(f"Starting URLShortner on {new_host}")
-    out = subprocess.check_output(["ssh", new_host, f"cd {CWD}", "&&", "./startNode"]) # start the default URL Shortner
-    print(out)
-    time.sleep(5)
+    subprocess.check_output(["ssh", new_host, f"cd {CWD}", "&&", "./startNode"]) # start the default URL Shortner
+    time.sleep(5) # wait for process to start
     
     if (len(old_hosts) % 2 == 0):
         # no need to redistribute data
         # rename hosts file
         print("Number of shards remained the same.")
-        out = subprocess.check_output(["./rename_alt_files"], cwd=f"{CWD}/utils")
-        print(out)
+        subprocess.check_output(["./rename_alt_files"], cwd=f"{CWD}/utils")
         dbConsistency.runDbConsistency()
         restartProxy()
         exit()
 
     print(f"Starting alternate (data redistribution) proxy")
-    out = subprocess.check_output(["./start_proxy", ALT_PROXY_PORT, ALT_NODE_PORT, ALT_HOSTS_FILENAME], cwd=f"{CWD}/utils") # start an alternate proxy used for data redistribution
-    print(out)
-
+    subprocess.check_output(["./start_proxy", ALT_PROXY_PORT, ALT_NODE_PORT, ALT_HOSTS_FILENAME], cwd=f"{CWD}/utils") # start an alternate proxy used for data redistribution
 
     # start alternate URL Shortner on each host for data redistribution
     for host in [*old_hosts, new_host]:
         print(f"Starting alternate (data redistribution) URLShortner on node {host}")
-        out = subprocess.check_output(["ssh", host, "cd", CWD, "&&", "./startNode", "-d", ALT_NODE_PORT, ALT_DB_NAME])
-        print(out)
+        subprocess.check_output(["ssh", host, "cd", CWD, "&&", "./startNode", "-d", ALT_NODE_PORT, ALT_DB_NAME])
     
     for master_node in representative_nodes:
         print(f"Redistributing data from {master_node}")
-        out = subprocess.check_output(["ssh", master_node, "cd", CWD, "&&", "python3", "./utils/sendAllData.py"]) # Send data to alternative proxy to redistribute
-        print(out)
+        subprocess.check_output(["ssh", master_node, "cd", CWD, "&&", "python3", "./utils/sendAllData.py"]) # Send data to alternative proxy to redistribute
 
     print("Done redistributing data.")
 
     # rename hosts.txt.new to hosts.txt
-    # mv newdb.db to urlshortner.db
-    out = subprocess.check_output(["./rename_alt_files", "-n"], cwd=f"{CWD}/utils") # move db and rename hosts file
-    print(out)
-    
+    subprocess.check_output(["./rename_alt_files", "-n",ALT_HOSTS_FILEPATH], cwd=f"{CWD}/utils") # move db and rename hosts file
+    dbConsistency.runDbConsistency();
+        
     #restart proxy
     restartProxy()
     
