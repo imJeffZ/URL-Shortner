@@ -10,13 +10,16 @@ public class Proxy {
     public static void main(final String[] args) throws IOException {
         int NODE_PORT = 8026;
         int PROXY_PORT = 8030;
+        String HOSTS_FILE = "./proxy/hosts.txt";
 
-        if(args.length==2){
+
+        if(args.length==3){
             PROXY_PORT = Integer.parseInt(args[0]);
             NODE_PORT = Integer.parseInt(args[1]);
+            HOSTS_FILE = String.format("./proxy/%s", args[2]);
         }
 
-        loadBalancer = new LoadBalancer();
+        loadBalancer = new LoadBalancer(HOSTS_FILE);
         cacheHandler = new CacheHandler();
         
         

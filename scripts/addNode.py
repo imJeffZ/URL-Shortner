@@ -1,62 +1,93 @@
 import argparse, subprocess, os
 import utils.py_utils as utils
+import dbConsistency 
+import time
+import inspect
 
-DEFAULT_PROXY_PORT=8030
-DEFAULT_NODE_PORT=8026
-ALT_PROXY_PORT=8031
-ALT_NODE_PORT=8026
+
+filename = inspect.getframeinfo(inspect.currentframe()).filename
+CWD     = os.path.dirname(os.path.abspath(filename))
+
+
+DEFAULT_PROXY_PORT='8030'
+DEFAULT_NODE_PORT='8026'
+ALT_PROXY_PORT='8031'
+ALT_NODE_PORT='8027'
 ALT_DB_NAME="new_db.db"
+ALT_HOSTS_FILENAME="hosts.txt.new"
+ALT_HOSTS_FILEPATH=f"{CWD}/../proxy/{ALT_HOSTS_FILENAME}"
 
-parser = argparse.ArgumentParser(description='Add a worker node that runs URLShortner.')
-parser.add_argument('hostName', metavar='hostName', type=str,
-                   help='The host name (or IP address) of the node.')
-args = parser.parse_args()
-new_host = args.hostName
 
+def restartProxy() -> None:
+    # stop proxy
+    subprocess.check_output(["./stop_proxy", DEFAULT_PROXY_PORT], cwd=f"{CWD}/utils")
+    # start proxy
+    subprocess.check_output(["./start_proxy", DEFAULT_PROXY_PORT], cwd=f"{CWD}/utils")
+    
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Add a worker node that runs URLShortner.')
+    parser.add_argument('hostName', metavar='hostName', type=str,
+                    help='The host name (or IP address) of the node.')
+    args = parser.parse_args()
+    new_host = args.hostName
     # get current shards
     # get 1 representative from each shard
     # add node to host.txt
     # start URLShortner on new node
     print(f"Adding worker node {new_host}")
-    hosts = utils.readHosts()
-    shards = utils.getShardsFromHosts(hosts)
-    representative_nodes = [shard[0] for shard in shards.values()]
-    print(f"Chose representative (master) nodes f{*representative_nodes}")
+    old_hosts = utils.readHosts()
+    old_shards = utils.getShardsFromHosts(old_hosts)
+    representative_nodes = [shard[0] for shard in old_shards.values()]
+    print(f"Chose representative (master) nodes f{representative_nodes}")
 
-    utils.addHostToFile(new_host)
+
+    for host in [*old_hosts, new_host]:
+        print(f"Adding {host} to {ALT_HOSTS_FILEPATH}")
+        utils.addHostToFile(host, path=ALT_HOSTS_FILEPATH)
+
 
     print(f"Starting URLShortner on {new_host}")
-    out = subprocess.check_output(["ssh", new_host, f"cd {os.getcwd()}", "&&", "./startNode"]) # start the default URL Shortner
+    out = subprocess.check_output(["ssh", new_host, f"cd {CWD}", "&&", "./startNode"]) # start the default URL Shortner
     print(out)
+    time.sleep(5)
+    
+    if (len(old_hosts) % 2 == 0):
+        # no need to redistribute data
+        # rename hosts file
+        print("Number of shards remained the same.")
+        out = subprocess.check_output(["./rename_alt_files"], cwd=f"{CWD}/utils")
+        print(out)
+        dbConsistency.runDbConsistency()
+        restartProxy()
+        exit()
 
     print(f"Starting alternate (data redistribution) proxy")
-    out = subprocess.check_output(["cd", "..", "&&", "java", "proxy/Proxy", "-d", ALT_PROXY_PORT, ALT_NODE_PORT]) # start an alternate proxy used for data redistribution
+    out = subprocess.check_output(["./start_proxy", ALT_PROXY_PORT, ALT_NODE_PORT, ALT_HOSTS_FILENAME], cwd=f"{CWD}/utils") # start an alternate proxy used for data redistribution
     print(out)
 
 
     # start alternate URL Shortner on each host for data redistribution
-    for host in hosts:
+    for host in [*old_hosts, new_host]:
         print(f"Starting alternate (data redistribution) URLShortner on node {host}")
-        out = subprocess.check_output(["ssh", host, "cd", os.getcwd(), "&&", "./startNode", "-d", ALT_PROXY_PORT, "newdb.db"])
+        out = subprocess.check_output(["ssh", host, "cd", CWD, "&&", "./startNode", "-d", ALT_NODE_PORT, ALT_DB_NAME])
+        print(out)
+    
+    for master_node in representative_nodes:
+        print(f"Redistributing data from {master_node}")
+        out = subprocess.check_output(["ssh", master_node, "cd", CWD, "&&", "python3", "./utils/sendAllData.py"]) # Send data to alternative proxy to redistribute
         print(out)
 
+    print("Done redistributing data.")
 
-
-'''
-# python program takes in node(node that we are trying to add.)
-    looks at host.txt file
-    save representative(master) nodes 
-    add node to host.txt
-    start URLShortner on new node
-    run redistribute proxy (reads from new host file)
-    all master nodes send data to redistribute proxydis
-
-# python program takes in node(node that we are trying to add.)
-    looks at host.txt file
-    save representative(master) nodes 
-    add node to host.txt
-    start URLShortner on new node
-    run redistribute proxy (reads from new host file)
-    all master nodes send data to redistribute proxy which is connected to URLShortnerResdribute (write method) new test.db
-'''
+    # rename hosts.txt.new to hosts.txt
+    # mv newdb.db to urlshortner.db
+    out = subprocess.check_output(["./rename_alt_files", "-n"], cwd=f"{CWD}/utils") # move db and rename hosts file
+    print(out)
+    
+    #restart proxy
+    restartProxy()
+    
+    print("Killing alternate system")
+    out = subprocess.check_output(["./stopOrchestration", "-d"], cwd=f"{CWD}")
+    print(out)
+    

@@ -1,8 +1,13 @@
 from typing import *
 import os
+import inspect
 import requests
 
-HOSTS_FILE_PATH = "../proxy/hosts.txt"
+filename = inspect.getframeinfo(inspect.currentframe()).filename
+CWD     = os.path.dirname(os.path.abspath(filename))
+
+
+HOSTS_FILE_PATH = f"{CWD}/../../proxy/hosts.txt"
 
 class bcolors:
     HEADER = '\033[95m'

@@ -3,6 +3,12 @@ import subprocess
 from utils.py_utils import *
 import getpass
 import os
+import inspect
+
+
+filename = inspect.getframeinfo(inspect.currentframe()).filename
+CWD     = os.path.dirname(os.path.abspath(filename))
+
 
 def getNumEntries(host: str) -> int:
     """
@@ -12,7 +18,7 @@ def getNumEntries(host: str) -> int:
     """
 
     try:
-        path = f"{os.getcwd()}/utils/db_utils.py"
+        path = f"{CWD}/utils/db_utils.py"
         return int(
             subprocess.check_output(
                 [
