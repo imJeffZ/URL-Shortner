@@ -9,8 +9,12 @@ cd $CWD/..
 if [ "$1" == "-d" ]; then
     java -classpath ".:sqlite-jdbc-3.32.3.2.jar" urlshortner/URLShortner $LOCALPORT $DBLOCATION &> /dev/null &
 else
-    java -classpath ".:sqlite-jdbc-3.32.3.2.jar" JDBC/DbInit > $CWD/out/service$(hostname).out 2>$CWD/out/service$(hostname).error < /dev/null
-    java -classpath ".:sqlite-jdbc-3.32.3.2.jar" urlshortner/URLShortner > $CWD/out/service$(hostname).out 2>$CWD/out/service$(hostname).error < /dev/null &
+    if [ "$1" == "-t" ]; then
+        java -classpath ".:sqlite-jdbc-3.32.3.2.jar" urlshortner/URLShortner >>/dev/null 2>&1 &
+    else
+        java -classpath ".:sqlite-jdbc-3.32.3.2.jar" jdbc/DBInit > $CWD/out/service$(hostname).out 2>$CWD/out/service$(hostname).error < /dev/null
+        java -classpath ".:sqlite-jdbc-3.32.3.2.jar" urlshortner/URLShortner > $CWD/out/service$(hostname).out 2>$CWD/out/service$(hostname).error < /dev/null &
+    fi
     echo $! > $CWD/out/service$(hostname).pid;
 fi
 

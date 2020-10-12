@@ -1,4 +1,4 @@
-package JDBC;
+package jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,12 +8,24 @@ import java.sql.SQLException;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
+/**
+* This class is used to handle DBConnection for SQLite3 instance for the URLShortner.
+*
+* @author  Ali Raza, Jefferson Zhong, Shahmeer Shahid
+* @version 1.0
+*/
 public class DBHandler implements DBHandlerInterface {
 
     private Connection conn;
 
     Statement stmt;
 
+    /**
+     * Create a SQLite DBConnection
+     *
+     * @param url Database conenction url.
+     * @return Connection object.
+     */
     public static Connection connect(String url) {
         Connection conn = null;
         try {
@@ -26,6 +38,11 @@ public class DBHandler implements DBHandlerInterface {
         return conn;
     }
 
+    /**
+     * Constructor for DBHandler.
+     *
+     * @param dbPath location on filesystem where Database file is located.
+     */
     public DBHandler(String dbPath) {
         this.conn = connect(String.format("jdbc:sqlite:%s", dbPath));
 
@@ -46,8 +63,6 @@ public class DBHandler implements DBHandlerInterface {
 
         try {
             sql = "INSERT INTO URLSHORTNER (SHORT,LONG) " + "VALUES ('gg', 'http://www.google.com' );";
-            stmt.executeUpdate(sql);
-            sql = "INSERT INTO URLSHORTNER (SHORT,LONG) " + "VALUES ('ali', 'http://ali-raza.me' );";
             stmt.executeUpdate(sql);
         } catch (Exception e) {
         }
@@ -135,7 +150,8 @@ public class DBHandler implements DBHandlerInterface {
 
     /**
      * Get the db connection
-     *
+     * 
+     * @return Current connection.
      */
     public Connection getConnection() {
         return this.conn;

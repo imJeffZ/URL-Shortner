@@ -20,14 +20,18 @@ else
     $CWD/utils/start_proxy
 fi
 
-# compile JDBC
-javac -classpath ".:sqlite-jdbc-3.32.3.2.jar" JDBC/*.java
+# compile jdbc
+javac -classpath ".:sqlite-jdbc-3.32.3.2.jar" jdbc/*.java
 # compile URLShortner
 javac $CWD/../urlshortner/*.java
 
 for host in `cat $CWD/../proxy/hosts.txt`
-do
-	ssh $host "${CWD}/startNode"
+do  
+    if [ "$1" == "-t" ]; then
+	    ssh $host "${CWD}/startNode -t"
+    else
+        ssh $host "${CWD}/startNode"
+    fi
 done
 
 # setup recurring tasks
