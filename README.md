@@ -14,13 +14,15 @@ By:
     - [3.2.1. Schema](#321-schema)
     - [3.2.2. Hash function](#322-hash-function)
 - [4. Orchestration](#4-orchestration)
-  - [Key Scripts/Files](#key-scriptsfiles)
-  - [Cron Jobs](#cron-jobs)
+  - [4.1. Key Scripts/Files](#41-key-scriptsfiles)
+  - [4.2. Cron Jobs](#42-cron-jobs)
 - [5. Scalability](#5-scalability)
   - [5.1. Vertical scaling](#51-vertical-scaling)
   - [5.2. Horizontal scaling](#52-horizontal-scaling)
 - [6. Consistency](#6-consistency)
 - [7. Availability](#7-availability)
+  - [7.1. Reads](#71-reads)
+  - [7.2. Writes](#72-writes)
 - [8. Disaster recovery](#8-disaster-recovery)
 - [9. Evaluation](#9-evaluation)
   - [9.1. Strengths](#91-strengths)
@@ -106,7 +108,7 @@ This means that as we scale horizontally and add worker nodes, the hash/mapping 
 # 4. Orchestration
 In addition to running the Proxy/Load Balancer, the Master Node is also responible for orchestrating Worker Nodes. To do this we have written a variety of scripts. Below are the key scripts/files:
 
-## Key Scripts/Files
+## 4.1. Key Scripts/Files
 
 - `proxy/hosts.txt`: The hostnames of the computers on which the worker nodes will exist. This file is considered a source of truth for the entire system and is used for nearly all tasks.
 - `scripts/startOrchestration`: This script is to be ran **on the master node**. When this script is run, the Proxy/Load Balancer is started on the current system, and the URL Shortner process is created on each of the systems in `proxy/hosts.txt`. Finally, a variety of scripts are scheduled to run in intervals of 30 secconds using **crontab**. Each process that is created is configured to output all logs in `scripts/out/`
@@ -114,7 +116,7 @@ In addition to running the Proxy/Load Balancer, the Master Node is also responib
 - `scripts/startNode`: When ran, this script will start the URL Shortner process on the current system. When the process is started, it will check if `/virtual/$USER/URLShortner/urlshortner.db` exists, and will initialize it if it doesn't.
 - `scripts/monitorUI.py`: this will start a UI that will ping the URL Shortner service on each host every second and display if the process is running.
 
-## Cron Jobs
+## 4.2. Cron Jobs
 
 In addition to the key scripts, we also have services that are configured to run on intervals.
 
@@ -170,12 +172,17 @@ As mentioned in [Cron Jobs](#cron-jobs), we use `scripts/dbConsistency.py` (whic
 
 # 7. Availability
 
-To ensure availability, we have 
+## 7.1. Reads
 
+If a node goes down and we fail to proxy a read request to it, we will automatically try another node in the same shard. Therefore, as long no more than 1 node within the same shard goes down, we will ensure read availability.
 
+## 7.2. Writes
+
+If a node goes down, then we will fail to write to all nodes in the same shard. However, we will still write to all the nodes in the shard that are still available. Then, when the node is back up and `scripts/dbConsistency.py` runs, the databases will be made consistent across all nodes.
 
 # 8. Disaster recovery
 
+As mentioned in [Cron Jobs](#cron-jobs), we use a combination of `healthService` and `fixNode` (which run one after another in 30 second intervals) to find and fix nodes that have gone down.
 
 
 # 9. Evaluation
