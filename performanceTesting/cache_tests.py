@@ -17,8 +17,6 @@ class testThread(threading.Thread):
 
 	def run(self):
 		GETResponse = send_GET_Request(self.short_pool, self.read_tests)
-		print("read response from thread" + str(self.thread_id) + ": " + str(GETResponse))
-
 
 def get_random_string(length):
 	letters = string.ascii_lowercase
@@ -57,33 +55,28 @@ def test(num_threads, read_tests_per_thread):
 	for t in threads:
 		t.join()
 
-def set_PROXY(proxy_host):
-	PROXY = "http://" + proxy_host + ":8030/"
-
 if __name__=='__main__':
 	import time
 	import sys
 	
-	if len(sys.argv) != 3:
-		print("Usage: python3 cache_tests.py [proxy_host] [number_of_read_tests]")
+	if len(sys.argv) != 5:
+		print("Usage: python3 cache_tests.py [proxy_host] [number_of_threads] [hostname] [number_of_read_tests]")
 		sys.exit(1)
 	
 	proxy_host = sys.argv[1]
-	set_PROXY(proxy_host)
+	PROXY = "http://" + proxy_host + ":8030/"
 	
-	read_tests = int(sys.argv[2])
-	num_threads = 8
+	hostname = sys.argv[2]
+	num_threads = int(sys.argv[3])
+	read_tests = int(sys.argv[4])
+
 	read_tests_per_thread = read_tests // num_threads
 
 	short_len = 8
 	populate_short_pools(short_len, num_threads, read_tests_per_thread)
 
-	tic = time.perf_counter()
-	test(num_threads, read_tests_per_thread)
-	toc = time.perf_counter()
-	print(f"Initial {read_tests:d} read tests took {toc - tic:0.4f} seconds on {num_threads:d} threads")
-
-	tic = time.perf_counter()
-	test(num_threads, read_tests_per_thread)
-	toc = time.perf_counter()
-	print(f"Second {read_tests:d} read tests took {toc - tic:0.4f} seconds on {num_threads:d} threads")
+	for i in range(3):
+		tic = time.perf_counter()
+		test(num_threads, read_tests_per_thread)
+		toc = time.perf_counter()
+		print(f"{hostname:s} {num_threads:d} {i:d} {read_tests:d} {toc-tic:0.6f}")

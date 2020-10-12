@@ -7,7 +7,6 @@ import threading
 PROXY = "http://dh2020pc05:8030/"
 
 
-
 class testThread(threading.Thread):
 	def __init__(self, thread_id, read_tests, write_tests):
 		threading.Thread.__init__(self)
@@ -17,9 +16,9 @@ class testThread(threading.Thread):
 	
 	def run(self):
 		GETResponse = send_GET_Request(self.read_tests)
-		print("read response from thread" + str(self.thread_id) + ": " + str(GETResponse))
+		# print("read response from thread" + str(self.thread_id) + ": " + str(GETResponse))
 		PUTResponse = send_PUT_Request(self.write_tests)
-		print("write response from thread" + str(self.thread_id) + ": " + str(PUTResponse))
+		# print("write response from thread" + str(self.thread_id) + ": " + str(PUTResponse))
 
 def get_random_string(length):
 	letters = string.ascii_lowercase
@@ -54,7 +53,6 @@ def send_PUT_Request(num_tests):
 				response["fail"] += 1
 		except:
 			print("Error sending request")
-
 	return response
 
 def test(num_threads, total_read_tests, total_write_tests):
@@ -73,17 +71,19 @@ if __name__=='__main__':
 	import time
 	import sys
 	
-	if len(sys.argv) != 4:
-		print("Usage: python3 random_tests.py [proxy_host] [number_of_read_tests] [number_of_write_tests]")
+	if len(sys.argv) != 6:
+		print("Usage: python3 random_tests.py [proxy_host] [hostname] [number_of_threads] [number_of_read_tests] [number_of_write_tests]")
 		sys.exit(1)
 	
 	proxy_host = sys.argv[1]
 	PROXY = "http://" + proxy_host + ":8030/"
-	read_tests = int(sys.argv[2])
-	write_tests = int(sys.argv[3])
-	num_threads = 8
+	hostname = sys.argv[2]
+	num_threads = int(sys.argv[3])
+	read_tests = int(sys.argv[4])
+	write_tests = int(sys.argv[5])
+
 
 	tic = time.perf_counter()
 	test(num_threads, read_tests, write_tests)
 	toc = time.perf_counter()
-	print(f"{read_tests:d} read tests and {write_tests:d} write tests took {toc - tic:0.4f} seconds on {num_threads:d} threads")
+	print(f"{hostname:s} {num_threads:d} {read_tests:d} {write_tests:d} {toc-tic:0.6f}")
