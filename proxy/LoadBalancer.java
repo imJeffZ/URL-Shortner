@@ -9,13 +9,12 @@ import java.util.Deque;
 import javax.imageio.IIOException;
 
 public class LoadBalancer {
-    private final String HOSTS_FILE = "./proxy/hosts.txt";
     Deque<String> hostsQueue;
     public ArrayList<String> hostsArray;
     private static ArrayList<Shard> shards;
 
-    LoadBalancer() throws IOException {
-        this.hostsArray = readHosts(HOSTS_FILE);
+    LoadBalancer(String hostsFile) throws IOException {
+        this.hostsArray = readHosts(hostsFile);
         // this.hostsQueue = new ArrayDeque<String>(hostsArray);
         assignHostsToShard(hostsArray);
     }

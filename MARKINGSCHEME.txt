@@ -2,11 +2,11 @@ URL Shortner: ?/40
 
 Functionality: ?/4
 	1) Long to Short: 2
-N		[Y/N] 1 Good Request
-N		[Y/N] 1 Bad Request
+Y		[Y/N] 1 Good Request
+Y		[Y/N] 1 Bad Request
 	2) Short to Long: 2 (ALWAYS ERROR)
-N		[Y/N] 1 Good Request
-N		[Y/N] 1 Bad Request
+Y		[Y/N] 1 Good Request
+Y		[Y/N] 1 Bad Request
 
 Architecture: ?/18
 	1) Scalability: 4
@@ -19,7 +19,7 @@ Y			[Y/N] 2 Works
 			- If not, how much effort to implement
 				[Y/N] 0.5 if simple
 	2) Consistency: 2
-N		[Y/N] 2 System response with most recent write or an error
+Y		[Y/N] 2 System response with most recent write or an error
 	3) Availability: 2
 Y		[Y/N] 2 System always gives a response
 	4) Partition Tolerance: 6
@@ -35,30 +35,43 @@ Y		[Y/N] 1 Caching
 Disaster recovery: ?/7
 	1) Healthcheck: 3
 Y		[Y/N] 1 Partially implemeted
-N		[Y/N] 1 Fully implemeted
+Y		[Y/N] 1 Fully implemeted
 Y		[Y/N] 1 UI implementation
 	2) Application server recovery: 2
 Y		[Y/N] 1 Partially implemeted
 Y		[Y/N] 1 Fully implemeted
 	3) Data recovery: 2
-N		[Y/N] 1 Partially implemeted
-N		[Y/N] 1 Fully implemeted
+Y		[Y/N] 1 Partially implemeted
+Y		[Y/N] 1 Fully implemeted
 
 Orchestration: ?/2
 Y	[Y/N] 1 Launch your service onto the given systems
 Y	[Y/N] 1 Shutdown your service
 
 Testing tools: ?/3
-N	[Y/N] 1 Script to test performance
-N	[Y/N] 1 Script to test availability
-N	[Y/N] 1 Show test results for their application (Graphs, Statistics)
+Y	[Y/N] 1 Script to test performance
+N	[Y/N] 1 Script to test availability										Ali FIX Orchestration SCRIPT WITH -t
+N	[Y/N] 1 Show test results for their application (Graphs, Statistics)	Jeff
 
 Documentation: ?/3
-Y	[Y/N] 1 Diagram of the system (saftware and data)
-N	[Y/N] 1 Detail description of the system (software and data)
-N	[Y/N] 1 Shows understand of the system, weakness and strength
+Y	[Y/N] 1 Diagram of the system (saftware and data)						Ali, Fix Diagram if needed
+N	[Y/N] 1 Detail description of the system (software and data)			Shahmeer
+N	[Y/N] 1 Shows understand of the system, weakness and strength			Shahmeer
 
 Code Quality: ?/3
-N	[Y/N] 1 Clean code. No commented out code, proper indentation
+N	[Y/N] 1 Clean code. No commented out code, proper indentation			
 N	[Y/N] 1 Proper Names. Classes, variables, functions
 Y	[Y/N] 1 Structure. Proper use of classes, functions, resources
+
+Fix URLShortner code into a package. 30 min	DONE
+Delete out folder on main folder.	1 min	DONE
+clean up addNode.py 						DONE
+Add comments to all scripts (what they are meant for at the top)
+Proxy add function descriptions
+JDBC INIT add comments and interface
+URLShortner add comments and function params and description
+
+look over any stupid commented out code and variable names.
+
+
+If done by  9 pm work on remove node lol

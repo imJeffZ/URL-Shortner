@@ -1,3 +1,5 @@
+package urlshortner;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -37,14 +39,22 @@ class URLConnectionHandler extends Thread {
 			if (VERBOSE) {
 				System.out.println("first line: " + input);
 			}
-			Pattern pput = Pattern.compile("^PUT\\s+/\\?short=(\\S+)&long=(\\S+)\\s+(\\S+)$");
-			Matcher mput = pput.matcher(input);
+			Pattern pIsPut = Pattern.compile("^PUT.*$");
+			Matcher mIsPut = pIsPut.matcher(input);
+			Pattern pputGoodFormat = Pattern.compile("^PUT\\s+/\\?short=(\\S+)&long=(\\S+)\\s+(\\S+)$");
+			Matcher mputGoodFormat = pputGoodFormat.matcher(input);
 			Pattern pget = Pattern.compile("^(\\S+)\\s+/(\\S+)\\s+(\\S+)$");
 			Matcher mget = pget.matcher(input);
 
-			if (mput.matches()) {
-				putHandler(mput, connect);
-			} else if (mget.matches()) {
+			// is a put request
+			if (mIsPut.matches()) {
+				if (mputGoodFormat.matches()) {
+					putHandler(mputGoodFormat, connect);
+				} else {
+					badRequestHandler(connect);
+				}
+			// otherwise treat as a get request
+			} else if(mget.matches()) {
 				getHandler(mget, connect);
 			} else {
 				badRequestHandler(connect);
@@ -104,6 +114,7 @@ class URLConnectionHandler extends Thread {
 	}
 
 	private void getHandler(Matcher mget, Socket connect) {
+		System.out.println("Invoked get request handler");
 		String shortResource = mget.group(2);
 		String longResource = this.urlDAO.find(shortResource);
 
@@ -162,13 +173,14 @@ class URLConnectionHandler extends Thread {
 	}
 
 	private void badRequestHandler(Socket connect) {
+		System.out.println("Invoked bad request handler");
 		PrintWriter out = null;
 		BufferedOutputStream dataOut = null;
 		try {
 			out = new PrintWriter(connect.getOutputStream());
 			dataOut = new BufferedOutputStream(connect.getOutputStream());
 
-			out.println("HTTP/1.1 400 File Not Found");
+			out.println("HTTP/1.1 400 Bad Request");
 			out.println("Server: Java HTTP Server/Shortner : 1.0");
 			out.println("Date: " + new Date());
 			out.println("Content-type: " + contentMimeType);

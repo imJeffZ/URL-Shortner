@@ -1,10 +1,12 @@
+package urlshortner;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
 public class URLResponseInit {
 
-    static final File WEB_ROOT = new File(".");
+    static final File WEB_ROOT = new File("./urlshortner/");
     static final String DEFAULT_FILE = "index.html";
     static final String FILE_NOT_FOUND = "404.html";
     static final String BAD_REQUST = "400.html";

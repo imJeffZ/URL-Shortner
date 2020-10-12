@@ -4,15 +4,25 @@ import java.io.*;
 import java.net.*;
 
 public class Proxy {
-    private static final int DEPRECATED_NODE_PORT = 8026;
-    private static final int PROXY_PORT = 8030;
     private static LoadBalancer loadBalancer;
     private static CacheHandler cacheHandler;
 
     public static void main(final String[] args) throws IOException {
+        int NODE_PORT = 8026;
+        int PROXY_PORT = 8030;
+        String HOSTS_FILE = "./proxy/hosts.txt";
 
-        loadBalancer = new LoadBalancer();
+
+        if(args.length==3){
+            PROXY_PORT = Integer.parseInt(args[0]);
+            NODE_PORT = Integer.parseInt(args[1]);
+            HOSTS_FILE = String.format("./proxy/%s", args[2]);
+        }
+
+        loadBalancer = new LoadBalancer(HOSTS_FILE);
         cacheHandler = new CacheHandler();
+        
+        
 
         // shardHandlers = new ShardHandler();
         try {
@@ -20,7 +30,7 @@ public class Proxy {
             System.out.println(
                     "✅ Proxy started on " + InetAddress.getLocalHost().getHostName() + " on port " + PROXY_PORT);
             // And start running the server
-            runServer(PROXY_PORT); // never returns
+            runServer(PROXY_PORT, NODE_PORT ); // never returns
         } catch (final Exception e) {
             System.err.println(e);
         }
@@ -33,7 +43,7 @@ public class Proxy {
      * 
      * @return
      */
-    public static void runServer(final int localport) throws IOException {
+    public static void runServer(final int localport, final int NODE_PORT) throws IOException {
         // Create a ServerSocket to listen for connections with
         final ServerSocket ss = new ServerSocket(localport);
 
@@ -57,7 +67,7 @@ public class Proxy {
                 // Start the client-to-server request thread running
                 // String nodeHost = loadBalancer.getHost();
                 final Thread t = new Thread(
-                        new ConnectionHandler(clientSocket, loadBalancer, cacheHandler, DEPRECATED_NODE_PORT));
+                        new ConnectionHandler(clientSocket, loadBalancer, cacheHandler, NODE_PORT));
                 t.start();
             } catch (final Exception e) {
                 clientSocket.close();
