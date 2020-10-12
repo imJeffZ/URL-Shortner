@@ -43,7 +43,7 @@ merge_files() {
         check_file_is_empty
     done
     for data_file in `ls | grep $test_type`; do
-        cat $data_file >> ../data/$test_type".merged"
+        cat $data_file >> ../data/$test_type".csv"
         rm -f $data_file
     done
 }
