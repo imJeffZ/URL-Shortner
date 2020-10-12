@@ -24,14 +24,14 @@ By:
   - [7.1. Reads](#71-reads)
   - [7.2. Writes](#72-writes)
 - [8. Disaster recovery](#8-disaster-recovery)
-- [Performance Testing](#performance-testing)
-  - [Process](#process)
-  - [Random Reads](#random-reads)
-  - [Effect of write operations](#effect-of-write-operations)
-- [9. Evaluation](#9-evaluation)
-  - [9.1. Strengths](#91-strengths)
-  - [9.2. Weaknesses](#92-weaknesses)
-  - [9.3. Other considerations](#93-other-considerations)
+- [9. Performance Testing](#9-performance-testing)
+  - [9.1. Process](#91-process)
+  - [9.2. Random Reads](#92-random-reads)
+  - [9.3. Effect of write operations](#93-effect-of-write-operations)
+- [10. Evaluation](#10-evaluation)
+  - [10.1. Strengths](#101-strengths)
+  - [10.2. Weaknesses](#102-weaknesses)
+  - [10.3. Other considerations](#103-other-considerations)
 
 
 # 1. Overview
@@ -188,28 +188,24 @@ If a node goes down, then we will fail to write to all nodes in the same shard. 
 
 As mentioned in [Cron Jobs](#cron-jobs), we use a combination of `healthService` and `fixNode` (which run one after another in 30 second intervals) to find and fix nodes that have gone down.
 
-# Performance Testing
-## Process
-## Random Reads
+# 9. Performance Testing
+## 9.1. Process
+## 9.2. Random Reads
 The graph below shows the result of varying number of reads with random shorts to our system when it is running on 5 worker nodes:
 
 ![random_reads.png](images/random_reads.png)
 
 As shown, the gradient of the line of best fit is $0.0007$ (which is the response time in seconds per request), which means that the system processed $1 / 0.0007 = 1428.57$ requests per seconds.
 
-## Effect of write operations
+## 9.3. Effect of write operations
 Next we wanted to investigate the effect of write requests on the system. Therefore, we varied the percentage of reads in 10,000 requests. Below are our results:
 
 ![varied_reads.png](images/varied_reads.png)
-As we can see, as the proprtion of write requests increases, 
+As we can see, as the proportion of write requests increases, the response time per request also increases. This is to be expected, as write operations are significantly more intensive than read operations in SQLite. However, based off of the assumption that reads are much more likely than writes, as established in [2. Design philosophy](#2-design-philosophy), we can see that the system will be highly performant in normal conditions.
 
-
-
-
-
-
-# 9. Evaluation
-## 9.1. Strengths
-## 9.2. Weaknesses
-## 9.3. Other considerations
+# 10. Evaluation
+## 10.1. Strengths
+As
+## 10.2. Weaknesses
+## 10.3. Other considerations
 
