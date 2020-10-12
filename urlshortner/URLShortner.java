@@ -6,10 +6,20 @@ import java.net.Socket;
 
 import jdbc.DBHandler;
 
+/**
+* This class the URLShortner object.
+*
+* @author  Ali Raza, Jefferson Zhong, Shahmeer Shahid
+* @version 1.0
+*/
 public class URLShortner {
 	// port to listen connection
 	
-
+	/**
+	* This main method initializes the URLShortner.
+	* @param args Unused.
+	* @return Nothing.
+	*/
 	public static void main(String[] args) throws IOException {
 		int LOCALPORT = 8026;
 		String DBLOCATION = String.format("/virtual/%s/URLShortner/urlshortner.db", System.getProperty("user.name"));
@@ -26,6 +36,13 @@ public class URLShortner {
 		}
 	}
 
+	/**
+    * spawn threads for incoming request.
+    *
+    * @param localport
+    * @param dbPath the path to the DB File.
+    *
+    */
 	static void runServer(int localport, String dbPath) throws IOException {
 		// Create a ServerSocket to listen for connections with
 		ServerSocket serverConnect = new ServerSocket(localport);
