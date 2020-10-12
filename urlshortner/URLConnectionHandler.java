@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import JDBC.DBHandler;
+import jdbc.DBHandler;
 
 class URLConnectionHandler extends Thread {
 

@@ -9,6 +9,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+/**
+* This class is a Cache Object which works along side the Proxy service.
+*
+* @author  Ali Raza, Jefferson Zhong, Shahmeer Shahid
+* @version 1.0
+*/
 public class CacheHandler {
 
     private byte[] RedirectPage;
@@ -19,6 +25,10 @@ public class CacheHandler {
     HashMap<String, String> cache = null;
     static final String contentMimeType = "text/html";
 
+    /**
+    * Initialize the Cache.
+    *
+    */
     public CacheHandler() {
         this.cache = new HashMap<String, String>();
         try {
@@ -28,6 +38,11 @@ public class CacheHandler {
         }
     }
 
+    /**
+    * Init HTML files to respond back to clients with.
+    *
+    * @throws IOException
+    */
     private void initFiles() throws IOException {
         // REDIRECT file init
         File file = new File(WEB_ROOT, REDIRECT);
@@ -35,6 +50,12 @@ public class CacheHandler {
         this.RedirectPage = readFileData(file, this.RedirectPageLength);
     }
 
+    /**
+    * Allows to check cache if short to long mapping is present.
+    *
+    * @param shortResource
+    * @return longResource
+    */
     public String checkLocalCache(String shortResource) {
         String longResource = find(shortResource);
         if (longResource != null) {
@@ -46,6 +67,12 @@ public class CacheHandler {
         }
     }
 
+    /**
+    * Reply to client if data found on cache.
+    *
+    * @param longResource
+    * @param streamToClient
+    */
     public void replyToClient(String longResource, OutputStream streamToClient) {
         PrintWriter out = new PrintWriter(streamToClient);
         BufferedOutputStream dataOut = new BufferedOutputStream(streamToClient);
@@ -67,15 +94,32 @@ public class CacheHandler {
         }
     }
 
+    /**
+    * Save data onto cache.
+    *
+    * @param shortURL
+    * @param longURL
+    */
     public void save(String shortURL, String longURL) {
         if (this.cache.size() < SIZE)
             this.cache.put(shortURL, longURL);
     }
 
+    /**
+    * Remove data from cache.
+    *
+    * @param shortURL
+    */
     public void remove(String shortURL) {
         this.cache.remove(shortURL);
     }
 
+    /**
+    * Find data on cache.
+    *
+    * @param shortURL
+    * @return the corresponding longURL
+    */
     private String find(String shortURL) {
         if (this.cache.containsKey(shortURL)) {
             return this.cache.get(shortURL);
@@ -84,6 +128,13 @@ public class CacheHandler {
         }
     }
 
+    /**
+    * Read HTML Files to respond to client with.
+    *
+    * @param file
+    * @param fileLength number of bytes to read.
+    * @return file if found.
+    */
     private static byte[] readFileData(File file, int fileLength) throws IOException {
         FileInputStream fileIn = null;
         byte[] fileData = new byte[fileLength];

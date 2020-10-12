@@ -8,11 +8,24 @@ import java.util.Deque;
 
 import javax.imageio.IIOException;
 
+/**
+* This class is used to generate a Load Balancer for URLShortner program.
+*
+* @author  Ali Raza, Jefferson Zhong, Shahmeer Shahid
+* @version 1.0
+*/
 public class LoadBalancer {
     Deque<String> hostsQueue;
     public ArrayList<String> hostsArray;
     private static ArrayList<Shard> shards;
 
+    /**
+    * Initialize the Load Balancer.
+    *
+    * @param hostFile the file to grab hosts from.
+    * @throw
+    *
+    */
     LoadBalancer(String hostsFile) throws IOException {
         this.hostsArray = readHosts(hostsFile);
         // this.hostsQueue = new ArrayDeque<String>(hostsArray);
