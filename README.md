@@ -25,8 +25,9 @@ By:
   - [7.2. Writes](#72-writes)
 - [8. Disaster recovery](#8-disaster-recovery)
 - [9. Performance Testing](#9-performance-testing)
-  - [9.1. Random Reads](#91-random-reads)
-  - [9.2. Effect of write operations](#92-effect-of-write-operations)
+  - [9.1. Process](#91-process)
+  - [9.2. Random Reads](#92-random-reads)
+  - [9.3. Effect of write operations](#93-effect-of-write-operations)
 - [10. Evaluation](#10-evaluation)
   - [10.1. Strengths](#101-strengths)
   - [10.2. Weaknesses](#102-weaknesses)
@@ -188,20 +189,41 @@ If a node goes down, then we will fail to write to all nodes in the same shard. 
 As mentioned in [Cron Jobs](#cron-jobs), we use a combination of `healthService` and `fixNode` (which run one after another in 30 second intervals) to find and fix nodes that have gone down.
 
 # 9. Performance Testing
-## 9.1. Random Reads
+## 9.1. Process
+Our testing script distributed tests to testing hosts in performanceTesting/hosts.txt file.
+
+You can flexibly specify the number of reads/writes you want to run.
+
+Results are output to performanceTesting/data directory.
+
+To run the test scripts for random tests:
+```
+cd performanceTesting
+./runDistributedTests random [proxy_host] [num_threads_used_for_test] [num_readtests] [num_writetests]
+./runDistributedTests random dh2020pc20 8 1000 200
+```
+
+To run the test scripts to test cache:
+```
+cd performanceTesting
+./runDistributedTests cache [proxy_host] [num_threads_used_for_test] [num_readtests]
+./runDistributedTests cache dh2020pc20 8 1000
+```
+## 9.2. Random Reads
 The graph below shows the result of varying number of reads with random shorts to our system when it is running on 5 worker nodes:
 
 ![random_reads.png](images/random_reads.png)
 
 As shown, the gradient of the line of best fit is $0.0007$ (which is the response time in seconds per request), which means that the system processed $1 / 0.0007 = 1428.57$ requests per seconds.
 
-## 9.2. Effect of write operations
+## 9.3. Effect of write operations
 Next we wanted to investigate the effect of write requests on the system. Therefore, we varied the percentage of reads in 10,000 requests. Below are our results:
 
 ![varied_reads.png](images/varied_reads.png)
 As we can see, as the proportion of write requests increases, the response time per request also increases. This is to be expected, as write operations are significantly more intensive than read operations in SQLite. However, based off of the assumption that reads are much more likely than writes, as established in [2. Design philosophy](#2-design-philosophy), we can see that the system will be highly performant in normal conditions.
 
 # 10. Evaluation
+
 ## 10.1. Strengths
 One key strength of our system is that it is highly performant, as it is able to respond to over 1000 requests per seconds in normal conditions.
 
