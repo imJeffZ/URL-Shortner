@@ -25,13 +25,11 @@ By:
   - [7.2. Writes](#72-writes)
 - [8. Disaster recovery](#8-disaster-recovery)
 - [9. Performance Testing](#9-performance-testing)
-  - [9.1. Process](#91-process)
-  - [9.2. Random Reads](#92-random-reads)
-  - [9.3. Effect of write operations](#93-effect-of-write-operations)
+  - [9.1. Random Reads](#91-random-reads)
+  - [9.2. Effect of write operations](#92-effect-of-write-operations)
 - [10. Evaluation](#10-evaluation)
   - [10.1. Strengths](#101-strengths)
   - [10.2. Weaknesses](#102-weaknesses)
-  - [10.3. Other considerations](#103-other-considerations)
 
 
 # 1. Overview
@@ -55,17 +53,18 @@ Furthermore, we also decided that the **Worker nodes should not have to know abo
 
 The above two conclusions (no nodes reserved for database and worker nodes should not interact with each other) combined meant that we would have tight coupling between the worker tasks and the assosciated data. Therefore, we decied that **we would not have a seperate database layer** (ie another distributed system that acts as a database), and instead we would assign data to each node according to a predefined schema.
 
-Finally, we decied that **no worker node should be a single point of failuer**. Note: the master node is and will always be a single point of failure for any system that does not have a dynamic routing/dynamic DNS system, as is the case with us.
+Furthermore, we decied that **no worker node should be a single point of failuer**. Note: the master node is and will always be a single point of failure for any system that does not have a dynamic routing/dynamic DNS system, as is the case with us.
 
-TODO, reads 100x likely than writes
+Finally, we decided that under normal conditions, **read/`GET` requests will be at least 100 times more likely than write/`PUT`**. This is because when someone writes a short to our system, they are likely to distribute the short link to others (which is the original use of URL Shortners). We estimate that on average, each short link will be distributed at least 100 times.
 
-Therefore, our key design philosophies were:
+Therefore, our key design philosophies and assumptions were:
 
 1. All worker nodes should run the same tasks.
 2. No resources will be reserved for a database.
 3. No seperate database layer.
 4. Workers should not need to know about each other.
 5. No worker node should be a single point of failure.
+6. Reads are 100x more likely than writes
 
 
 # 3. Architecture
@@ -189,15 +188,14 @@ If a node goes down, then we will fail to write to all nodes in the same shard. 
 As mentioned in [Cron Jobs](#cron-jobs), we use a combination of `healthService` and `fixNode` (which run one after another in 30 second intervals) to find and fix nodes that have gone down.
 
 # 9. Performance Testing
-## 9.1. Process
-## 9.2. Random Reads
+## 9.1. Random Reads
 The graph below shows the result of varying number of reads with random shorts to our system when it is running on 5 worker nodes:
 
 ![random_reads.png](images/random_reads.png)
 
 As shown, the gradient of the line of best fit is $0.0007$ (which is the response time in seconds per request), which means that the system processed $1 / 0.0007 = 1428.57$ requests per seconds.
 
-## 9.3. Effect of write operations
+## 9.2. Effect of write operations
 Next we wanted to investigate the effect of write requests on the system. Therefore, we varied the percentage of reads in 10,000 requests. Below are our results:
 
 ![varied_reads.png](images/varied_reads.png)
@@ -205,7 +203,21 @@ As we can see, as the proportion of write requests increases, the response time 
 
 # 10. Evaluation
 ## 10.1. Strengths
-As
+One key strength of our system is that it is highly performant, as it is able to respond to over 1000 requests per seconds in normal conditions.
+
+Furthermore, it is able to scale horizontally and veritically quite well through the use of multithreading and simple scripts.
+
+Furthermore, the simplicity of the system, where each worker node is near stateless and there is no communication betwen worker nodes, means that we can deploy this system in a variety of scenarios. The only requirements are that we are able to `ssh` from the master node to each worker node (and that port 80 is open on all systems).
+
 ## 10.2. Weaknesses
-## 10.3. Other considerations
+The biggest weakness of the system is that we have to wait for 30 seconds (in the worst case) to ensure consistency and full availability across the system. 
+
+Another weakness of the system is that writes happen to all nodes within a shard when they are received, which may be slow.
+
+Furthermore, quite a lot of responsibility is placed on the master node. This is a trade off that comes with ensuring that nodes are not required to communiate with each other, as we now need a centralized control system.
+
+Finally, we have a single point of failure in the load balancer/proxy. However, this is to be expected in any system that does not have a dynamic DNS/routing system.
+
+
+
 
