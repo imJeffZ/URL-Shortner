@@ -54,6 +54,10 @@ public class LoadBalancer {
     void addHost(String host) {}
     void removeHost(String host) {}
     
+    /***
+     * read hosts from hosts.txt file.
+     * @return host
+     */
     private ArrayList<String> readHosts(final String hostFile) throws IOException {
         String s;
         ArrayList<String> hosts = new ArrayList<String>();
@@ -67,6 +71,9 @@ public class LoadBalancer {
         return hosts;
     }
 
+    /***
+     * assign a node to its respective shard.
+     */
     private void assignHostsToShard(ArrayList<String> hosts) {
         int numHosts = hosts.size();
         shards = new ArrayList<Shard>();

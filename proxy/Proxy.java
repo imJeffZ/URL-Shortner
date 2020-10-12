@@ -3,6 +3,13 @@ package proxy;
 import java.io.*;
 import java.net.*;
 
+/**
+* This class is a Proxy service for the URLShortner program. It is multithreaded and request is handled on its
+* own thread.
+*
+* @author  Ali Raza, Jefferson Zhong, Shahmeer Shahid
+* @version 1.0
+*/
 public class Proxy {
     private static LoadBalancer loadBalancer;
     private static CacheHandler cacheHandler;
