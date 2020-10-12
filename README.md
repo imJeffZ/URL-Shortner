@@ -24,6 +24,10 @@ By:
   - [7.1. Reads](#71-reads)
   - [7.2. Writes](#72-writes)
 - [8. Disaster recovery](#8-disaster-recovery)
+- [Performance Testing](#performance-testing)
+  - [Process](#process)
+  - [Random Reads](#random-reads)
+  - [Effect of write operations](#effect-of-write-operations)
 - [9. Evaluation](#9-evaluation)
   - [9.1. Strengths](#91-strengths)
   - [9.2. Weaknesses](#92-weaknesses)
@@ -183,6 +187,25 @@ If a node goes down, then we will fail to write to all nodes in the same shard. 
 # 8. Disaster recovery
 
 As mentioned in [Cron Jobs](#cron-jobs), we use a combination of `healthService` and `fixNode` (which run one after another in 30 second intervals) to find and fix nodes that have gone down.
+
+# Performance Testing
+## Process
+## Random Reads
+The graph below shows the result of varying number of reads with random shorts to our system when it is running on 5 worker nodes:
+
+![random_reads.png](images/random_reads.png)
+
+As shown, the gradient of the line of best fit is $0.0007$ (which is the response time in seconds per request), which means that the system processed $1 / 0.0007 = 1428.57$ requests per seconds.
+
+## Effect of write operations
+Next we wanted to investigate the effect of write requests on the system. Therefore, we varied the percentage of reads in 10,000 requests. Below are our results:
+
+![varied_reads.png](images/varied_reads.png)
+As we can see, as the proprtion of write requests increases, 
+
+
+
+
 
 
 # 9. Evaluation
