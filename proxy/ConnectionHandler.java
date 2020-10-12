@@ -5,6 +5,14 @@ import java.net.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+* This class is a ConnectionHandler which handles connections coming into the proxy server.
+* It looks up the hash using the Load Balancer and forwards the traffic to where the data can
+* be found. Once the node replies, it forwards the data back to the client.
+*
+* @author  Ali Raza, Jefferson Zhong, Shahmeer Shahid
+* @version 1.0
+*/
 class ConnectionHandler extends Thread {
     Socket clientSocket;
     InputStream streamFromClient;
@@ -20,6 +28,15 @@ class ConnectionHandler extends Thread {
     private String longResource;
     private CacheHandler cacheHandler;
 
+    /**
+    * Initialize the Connection handler.
+    *
+    * @param clientSocket the incoming client socket connection.
+    * @param loadBalancer the current load balancer instance.
+    * @param cacheHandler the current cache handler instance.
+    * @param nodePort the port to connect to a URLShortner node with.
+    *
+    */
     public ConnectionHandler(Socket clientSocket, LoadBalancer loadBalancer, CacheHandler cacheHandler, int nodePort) {
         this.clientSocket = clientSocket;
         this.nodePort = nodePort;
@@ -29,6 +46,12 @@ class ConnectionHandler extends Thread {
         this.cacheHandler = cacheHandler;
     }
 
+    /**
+    * Handler connection between client and proxy. Data is read from client and sent to the
+    * respective handler to deal with the request. Once the handler responds back the data is
+    * sent back to the client and socket connections are closed.
+    *
+    */
     @Override
     public void run() {
         try {
@@ -75,7 +98,7 @@ class ConnectionHandler extends Thread {
     }
 
     /*
-     * close client and socket connection.
+     * close client and node socket connections.
      */
     private void closeConnections() {
         try {
@@ -89,9 +112,13 @@ class ConnectionHandler extends Thread {
         }
     }
 
-    /*
-     * handle incoming request from client.
-     */
+    /**
+    * Handle incoming request.
+    *
+    * @param bytesRead the number of bytes read from a client.
+    * @return Socket instance from the node we are reading from.
+    *
+    */
     public Socket handleRequest(int bytesRead) {
         try {
             ByteArrayInputStream stream = new ByteArrayInputStream(request);
@@ -120,10 +147,14 @@ class ConnectionHandler extends Thread {
         }
     }
 
-    /*
-     * handle put requests from client and send them of to the correct shrad to be
-     * written.
-     */
+    /**
+    * Handle incoming PUT request.
+    *
+    * @param mput the incoming matched PUT request.
+    * @param bytesRead the number of bytes read from a client.
+    * @return Socket instance from the node we are reading from.
+    *
+    */
     private Socket putHandler(Matcher mput, int bytesRead) {
 
         String shortResource = mput.group(1);
@@ -132,10 +163,14 @@ class ConnectionHandler extends Thread {
         return shard.forwardWriteRequest(request, bytesRead, nodePort);
     }
 
-    /*
-     * handle get requests from client and send them of to the correct shrad to be
-     * read from.
-     */
+    /**
+    * Handle incoming GET request.
+    *
+    * @param mget the incoming matched GET request.
+    * @param bytesRead the number of bytes read from a client.
+    * @return Socket instance from the node we are reading from.
+    *
+    */
     private Socket getHandler(Matcher mget, int bytesRead) {
         incomingReqString = mget.group(2);
         longResource = this.cacheHandler.checkLocalCache(incomingReqString);

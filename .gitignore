@@ -7,7 +7,7 @@ scripts/out/*.pid
 scripts/out/*.error
 performanceTesting/out/*.out
 urlshortner/*.class
-JDBC/*.class
+jdbc/*.class
 .vscode
 __pycache__
 scripts/crontab

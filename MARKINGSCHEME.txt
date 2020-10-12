@@ -68,7 +68,7 @@ Delete out folder on main folder.	1 min	DONE
 clean up addNode.py 						DONE
 Add comments to all scripts (what they are meant for at the top)
 Proxy add function descriptions
-JDBC INIT add comments and interface
+jdbc INIT add comments and interface
 URLShortner add comments and function params and description
 
 look over any stupid commented out code and variable names.

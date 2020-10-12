@@ -2,7 +2,7 @@ package urlshortner;
 
 import java.sql.SQLException;
 
-import JDBC.DBHandler;
+import jdbc.DBHandler;
 
 class URLDataAccessObject {
 
